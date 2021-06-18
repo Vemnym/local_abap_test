@@ -1,0 +1,2271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<nugget name="NUGGET3">
+ <PROG NAME="Z88AAKT1" VARCL="X" SUBC="1" RMAND="601" RLOAD="R" FIXPT="X" UCCHECK="X">
+  <textPool>
+   <language SPRAS="R">
+    <textElement ID="I" KEY="001" ENTRY="Сумма двух чисел" LENGTH="24 "/>
+    <textElement ID="I" KEY="BT1" ENTRY="Очистка" LENGTH="7 "/>
+    <textElement ID="I" KEY="BT2" ENTRY="Сообщение" LENGTH="9 "/>
+    <textElement ID="R" ENTRY="Тестовая программа Мамаев" LENGTH="25 "/>
+    <textElement ID="S" KEY="NUMBER1" ENTRY="        Число 1" LENGTH="15 "/>
+    <textElement ID="S" KEY="NUMBER2" ENTRY="        Число 2" LENGTH="15 "/>
+   </language>
+  </textPool>
+  <source>*&amp;---------------------------------------------------------------------*
+*&amp; Report  Z88AAKT1
+*&amp;
+*&amp;---------------------------------------------------------------------*
+*&amp;
+*&amp;
+*&amp;---------------------------------------------------------------------*
+
+REPORT  z88aakt1.
+TABLES: sscrfields.
+
+
+*INCLUDE ole2incl.
+
+*FORMAT COLOR COL_TOTAL.
+*
+*START-OF-SELECTION.
+**types: integer type i. &quot; неэлементарый тип
+*  DATA: yy TYPE i. &quot; объявить переменную
+*
+*  yy = 56.
+*
+*  WRITE &apos;qqqqqqq&apos;.
+*
+*  WRITE yy.
+*
+*  DATA: xx LIKE yy.
+*  WRITE xx.
+*  xx = 33.
+*  yy = 46.
+*  WRITE xx.
+*
+**&amp;---------------------------------------------------------------------*
+*  DATA: BEGIN OF videocards, &quot; Структура
+*    id(4) TYPE c,
+*    name(15) TYPE c,
+*    power TYPE i,
+*    cost LIKE yy,
+*  END OF videocards.
+*
+*  WRITE videocards-cost.
+*
+*  videocards-cost = 25.
+*  WRITE videocards-cost.
+*
+*
+*  DATA: generator LIKE videocards.
+*  generator-cost = 55.
+*  generator-cost = generator-cost + 4.
+*  WRITE /4 generator-cost. &quot; write number - сместить значение, / - вывести на следующей строке
+*
+*  generator-name = &apos;Test1&apos;.
+*  WRITE generator-name.
+*  videocards-name = &apos;Test2&apos;.
+*
+**&amp;---------------------------------------------------------------------*
+*  DATA both_string(25).
+*
+*  CONCATENATE generator-name videocards-name INTO both_string. &quot; объединение строк
+*  WRITE / both_string HOTSPOT.
+*
+*select-options name for generator-name.
+**select-options cost for generator-cost.
+*
+*
+*  DATA: string TYPE string VALUE &apos;Тестовоя строка&apos;,
+*        left_string(10) VALUE &apos;Hello&apos;,
+*        right_string(25) VALUE &apos;World&apos;.
+*
+*  SEARCH string FOR &apos;сewrwrтрока&apos;. &quot; Проверка есть ли подстрока в строке, sy-fdpos - сдвиг относительно начала
+*  IF sy-subrc NE 0.
+*    WRITE / &apos;не найдено&apos;.
+*  ELSE.
+*    WRITE / &apos;найдено&apos;.
+*  ENDIF.
+*
+**&amp;---------------------------------------------------------------------*
+*  DATA: float1 TYPE p DECIMALS 2 &quot; числа с плавающей запятой
+*        , float2 TYPE p DECIMALS 2 .
+*  float1 = 1 / 4.
+*  WRITE / float1.
+*  float2 = 2 * float1.
+*  WRITE / float2.
+*
+*  float1 = 10 DIV 3.
+*  float2 = 10 MOD 3.
+*  WRITE: float1, float2.
+*
+**&amp;---------------------------------------------------------------------*
+*  DATA day TYPE d.
+*  day = &apos;19950314&apos;.
+*  WRITE /(10) day.
+*
+*  DATA: day_of_week TYPE scal-indicator. &quot; Определение дня недели, только номер
+*  CALL FUNCTION &apos;DATE_COMPUTE_DAY&apos;
+*    EXPORTING
+*      date   = day
+*    IMPORTING
+*      day    = day_of_week
+*    EXCEPTIONS
+*      OTHERS = 8.
+*  WRITE / day_of_week.
+*
+*  day+6(2) = &apos;01&apos;. &quot; Определение последнего дня предыдущего месяца
+*  SUBTRACT 1 FROM day.
+*  WRITE: day TO left_string,
+*         /(10) day.
+*
+*  DATA time TYPE t.
+*  time = sy-uzeit.
+*  time(2) = time+0(2) + 4.
+*  WRITE /(10) time.
+*
+**&amp;---------------------------------------------------------------------*
+*  DATA: BEGIN OF product,
+*    brand(3) TYPE c,
+*    videocard LIKE videocards,
+*    END OF product.
+*
+*  product-brand = &apos;MSI&apos;.
+*  product-videocard-name = &apos;RX570&apos;.
+*
+*
+*  WRITE: / product-brand, product-videocard-name. &quot; Объединяю строки с разделителем
+*  CONCATENATE product-brand  product-videocard-name INTO string SEPARATED BY  left_string.
+*  WRITE / string.
+*
+*END-OF-SELECTION.
+*
+**&amp;---------------------------------------------------------------------*
+*START-OF-SELECTION.
+*  PERFORM line USING &apos;-&apos;.
+WRITE / &apos;Click me!&apos; COLOR = 5 HOTSPOT. &quot; активный write, вызывает at line selection
+*
+*END-OF-SELECTION.
+*
+**&amp;---------------------------------------------------------------------*
+*START-OF-SELECTION. &quot; Окно ввода чисел и кнопок
+*  SELECTION-SCREEN BEGIN OF BLOCK bl1 WITH FRAME TITLE text-001.
+**  PARAMETERS: number1 TYPE i.
+**  PARAMETERS: number2 TYPE i.
+*  SELECTION-SCREEN END OF BLOCK bl1.
+
+
+*  SELECTION-SCREEN SKIP.
+*  SELECTION-SCREEN: PUSHBUTTON 1(10) bt1 USER-COMMAND uc1,
+*                    PUSHBUTTON 15(10) bt2 USER-COMMAND uc2.
+
+*  ADD number2 TO number1.
+*  PERFORM line USING &apos;+&apos;.
+*  WRITE: / &apos;Результат сложения = &apos;, number1.
+
+*INITIALIZATION.
+*  bt1 = text-bt1.
+*  bt2 = text-bt2.
+*
+*AT SELECTION-SCREEN.
+*  CASE sscrfields-ucomm.
+*    WHEN &apos;UC1&apos;.
+*      CLEAR: number1, number2.
+*  ENDCASE.
+*
+*  CASE sscrfields.
+*    WHEN &apos;UC2&apos;.
+*      MESSAGE: &apos;Кнопка была нажата&apos; TYPE &apos;I&apos;.
+*  ENDCASE.
+
+*END-OF-SELECTION.
+
+*&amp;---------------------------------------------------------------------*
+START-OF-SELECTION.&quot; Тест таблицы
+*  PERFORM line USING &apos;*&apos;.
+
+
+
+ TABLES customers.
+
+  DATA all_customers LIKE TABLE OF customers.
+  DATA customer LIKE LINE OF all_customers.
+*  SELECT * FROM customers UP TO 2 ROWS INTO all_customers.
+*    WRITE: / customers-name, customers-city.
+*  ENDSELECT.
+
+
+*  CALL FUNCTION &apos;ENQUEUE_EZ88_CUSTOMERS&apos;
+*     EXPORTING
+*       mode_customers       = &apos;O&apos;
+**     mandt                = sy-mandt
+*       id                   = &apos;11111113&apos;
+*       _WAIT                = &apos;X&apos;
+*
+*  EXCEPTIONS
+*       foreign_lock         = 1.
+
+  CALL FUNCTION &apos;ENQUEUE_EZ88_CUSTOMERS&apos;
+    EXPORTING
+      mode_customers       = &apos;E&apos;
+*     mandt                = sy-mandt
+      id                   = &apos;11111113&apos;
+*       _WAIT                = &apos;X&apos;
+
+ EXCEPTIONS
+      foreign_lock         = 1.
+
+
+  DATA check_enqueue.
+
+  IF sy-subrc EQ 1.
+    check_enqueue = sy-subrc.
+    DATA text TYPE string.
+    CONCATENATE &apos;Таблица заблокирована пользователем: &apos; sy-msgv1 INTO text.
+    MESSAGE text TYPE &apos;I&apos;.
+  ENDIF.
+
+  SELECT * FROM customers INTO TABLE all_customers.
+
+
+  LOOP AT all_customers INTO customer.
+    IF customer-id = &apos;11111113&apos; AND check_enqueue EQ 0.
+      customer-name = &apos;testtest&apos;.
+      MODIFY customers FROM customer.
+    ENDIF.
+    WRITE: / &apos;|&apos;, customer-id,&apos;|&apos;, customer-name,&apos;|&apos;, customer-city,&apos;|&apos;.
+    ULINE.
+
+  ENDLOOP.
+
+  CALL FUNCTION &apos;DEQUEUE_EZ88_CUSTOMERS&apos;
+   EXPORTING
+     mode_customers       = &apos;E&apos;
+     mandt                = sy-mandt
+     id                   = &apos;11111113&apos;
+*     X_ID                 = &apos; &apos;
+*     _SCOPE               = &apos;3&apos;
+*     _SYNCHRON            = &apos; &apos;
+*     _COLLECT             = &apos; &apos;
+            .
+
+
+
+
+*data : O_PATH TYPE DXLPATH.
+*
+*
+*CALL FUNCTION &apos;F4_DXFILENAME_TOPRECURSION&apos;
+* EXPORTING
+*  I_LOCATION_FLAG       = &apos;P&apos;
+**   I_SERVER              = &apos;?&apos;
+**  I_PATH                =  &apos; &apos;
+**   FILEMASK              = &apos;*.*&apos;
+*
+**   FILEOPERATION         = &apos;R&apos;
+* IMPORTING
+**   O_LOCATION_FLAG       =
+**   O_SERVER              =
+*  O_PATH                =  O_PATH
+**   ABEND_FLAG            =
+* EXCEPTIONS
+*   RFC_ERROR             = 1
+*   ERROR_WITH_GUI        = 2
+*   OTHERS                = 3
+*          .
+*IF sy-subrc &lt;&gt; 0.
+** Implement suitable error handling here
+*ENDIF.
+*
+*DATA : file TYPE string,
+*      utab TYPE TABLE OF string,
+*      stab LIKE LINE OF utab.
+*file = O_PATH.
+*
+*
+*CALL METHOD cl_gui_frontend_services=&gt;gui_upload
+*  EXPORTING
+*    filename                = file
+**    filetype                = &apos;ASC&apos;
+**    has_field_separator     = SPACE
+**    header_length           = 0
+**    read_by_line            = &apos;X&apos;
+**    dat_mode                = SPACE
+**    codepage                = SPACE
+**    ignore_cerr             = ABAP_TRUE
+**    replacement             = &apos;#&apos;
+**    virus_scan_profile      =
+**  IMPORTING
+**    filelength              =
+**    header                  =
+*  CHANGING
+*    data_tab                = utab
+*  EXCEPTIONS
+*    file_open_error         = 1
+*    file_read_error         = 2
+*    no_batch                = 3
+*    gui_refuse_filetransfer = 4
+*    invalid_type            = 5
+*    no_authority            = 6
+*    unknown_error           = 7
+*    bad_data_format         = 8
+*    header_not_allowed      = 9
+*    separator_not_allowed   = 10
+*    header_too_long         = 11
+*    unknown_dp_error        = 12
+*    access_denied           = 13
+*    dp_out_of_memory        = 14
+*    disk_full               = 15
+*    dp_timeout              = 16
+*    not_supported_by_gui    = 17
+*    error_no_gui            = 18
+*    others                  = 19
+*        .
+*IF sy-subrc &lt;&gt; 0.
+** MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+**            WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+*ENDIF.
+*
+*SKIP.
+*
+*LOOP AT utab INTO stab.
+*  write: /  stab.
+*ENDLOOP.
+
+
+*  WRITE / &apos;Тест таблицы&apos;.
+*
+*  LOOP AT all_customers INTO customer WHERE name = &apos;Brown&apos;.
+*    WRITE: / customer-name, customer-city.
+*  ENDLOOP.
+
+END-OF-SELECTION.
+
+*&amp;---------------------------------------------------------------------*
+*  NEW-PAGE.
+*  FORMAT COLOR COL_TOTAL INTENSIFIED OFF.
+*  WRITE / &apos;Тест новой странмцы&apos;.
+*
+*  DO 2 TIMES.
+*    PERFORM list_index.
+*  ENDDO.
+*
+*
+*  WRITE: / &apos;@00@&apos;,  &apos;@01@&apos;.
+*
+*  INCLUDE: &lt;symbol&gt;, &lt;icon&gt;.
+*  WRITE: / sym_phone AS SYMBOL,
+*          sym_flash AS SYMBOL.
+*
+*END-OF-PAGE.
+*
+**&amp;---------------------------------------------------------------------*
+*START-OF-SELECTION.
+*
+*TOP-OF-PAGE.
+*  WRITE / &apos;Текст сверху страницы&apos;.
+*
+*END-OF-SELECTION.
+*
+**&amp;---------------------------------------------------------------------*
+*  FORMAT COLOR COL_BACKGROUND.
+*  WRITE / &apos;текст продолжается&apos;.
+*
+*  DATA int TYPE i VALUE 5.
+*  PERFORM square CHANGING int.
+*  WRITE: / &apos;Результат формы square = &apos;, int COLOR 6.
+*
+*
+*
+**&amp;---------------------------------------------------------------------*
+**&amp;      Form  square
+**&amp;---------------------------------------------------------------------*
+**       Возвести в квадрат
+**----------------------------------------------------------------------*
+**      --&gt;NUMBER    число возводимое в квадрат
+**----------------------------------------------------------------------*
+*FORM square CHANGING number TYPE i.
+*  number = number * number.
+*ENDFORM.                    &quot;square
+*
+**&amp;---------------------------------------------------------------------*
+**&amp;      Form  list_index
+**&amp;---------------------------------------------------------------------*
+**       text
+**----------------------------------------------------------------------*
+*FORM list_index.
+*  DATA: even TYPE i,
+*        counter TYPE i.
+*
+*  DO 20 TIMES.
+*    IF sy-index &gt; 5.
+*      EXIT.
+*    ENDIF.
+*    counter = sy-index.
+*    even = counter MOD 2.
+*    IF even = 0.
+*      WRITE counter COLOR COL_HEADING.
+*    ELSE.
+*      WRITE / counter COLOR COL_GROUP CURRENCY &apos;EUR&apos;.
+*    ENDIF.
+*  ENDDO.
+*ENDFORM.                    &quot;list_index
+*
+AT LINE-SELECTION. &quot; Обработка события
+*  WRITE: / &apos;Дата&apos;, (10) sy-datum,
+*         / &apos;Время&apos;, (10) sy-uzeit.
+*
+*  data user_answer type string.
+*  call FUNCTION &apos;POPUP_TO_CONFIRM_LOSS_OF_DATA&apos;
+*      EXPORTING
+*        titel = &apos;Заголовок&apos;
+*        textline1 = &apos;Строка 1&apos;
+*      IMPORTING
+*        answer = user_answer.
+*
+**  SET PARAMETER ID &apos;Таблица БД&apos; FIELD &apos;customers&apos;.
+*  call TRANSACTION &apos;AL11&apos;.
+  CALL FUNCTION &apos;SAPGUI_PROGRESS_INDICATOR&apos;
+   EXPORTING
+*     PERCENTAGE       = 0
+     TEXT             = &apos;Test text &apos;
+            .
+
+  &quot;--------------------------------------
+  &quot;--------
+
+
+*  TYPES: data1(1500) TYPE c,          &quot;  Таблица строк для записи в Exel
+*    ty_data TYPE TABLE OF data1.
+*
+*  DATA: gt_1 TYPE ty_data,
+*        gs_1 LIKE LINE OF gt_1,
+*        deli(1) TYPE c,
+*        l_rc TYPE i,
+*        temp TYPE string.
+*
+*  deli = cl_abap_char_utilities=&gt;horizontal_tab.         &quot; Разделитель
+*
+*  DATA: h_excel   TYPE ole2_object, &quot; Excel object            &quot; Обьекты OLE
+*        h_sheets  TYPE ole2_object, &quot; list of workbooks
+*        h_sheet   TYPE ole2_object, &quot; workbook
+*        h_cell    TYPE ole2_object, &quot; cell
+*        worksheet TYPE ole2_object, &quot;Worksheet
+*        e_color   TYPE ole2_object, &quot;Color
+*        range     TYPE ole2_object, &quot;Range
+*        borders   TYPE ole2_object, &quot;Borders
+*        h_sheet1  TYPE ole2_object, &quot;First sheet
+*        h_sheet2  TYPE ole2_object, &quot;Second Sheet
+*        h_sheet3  TYPE ole2_object, &quot;Third Sheet
+*        gs_font   TYPE ole2_object, &quot;Font&lt;/code&gt;
+*
+*        w_cell1 TYPE ole2_object,
+*        w_cell2 TYPE ole2_object.
+*
+*
+*  CONCATENATE &apos;ID&apos; deli &apos;Имя&apos; deli &apos;Город&apos; INTO temp.
+*  APPEND temp TO gt_1.
+*  CLEAR temp.
+*
+*  LOOP AT all_customers INTO customer.  &quot; Преобразуем нужные столбцы внутренней таблицы в таблицу строк
+*    CONCATENATE customer-id deli customer-name deli customer-city INTO temp.
+*    APPEND temp TO gt_1.
+*    CLEAR temp.
+*  ENDLOOP.
+*
+*
+*  CREATE OBJECT h_excel &apos;EXCEL.APPLICATION&apos;.
+*
+*  CALL METHOD OF h_excel &apos;Workbooks&apos; = h_sheets.
+*
+*  SET PROPERTY OF h_excel &apos;Visible&apos; = 1.
+*
+*  CALL METHOD OF h_sheets &apos;Add&apos; = h_sheet.
+*
+*  GET PROPERTY OF h_excel &apos;ACTIVESHEET&apos; = worksheet.
+*
+*  SET PROPERTY OF worksheet &apos;Name&apos; = &apos;EXEL_TEST&apos;. &quot; Имя страницы
+*
+*  CALL METHOD cl_gui_frontend_services=&gt;clipboard_export &quot; Copy data in clipboard
+*   IMPORTING
+*     data                 = gt_1[]
+*   CHANGING
+*     rc                   = l_rc
+*   EXCEPTIONS
+*     cntl_error           = 1
+*     error_no_gui         = 2
+*     not_supported_by_gui = 3
+*     OTHERS               = 4.
+*
+*
+*  CALL METHOD OF h_excel &apos;Cells&apos; = w_cell1
+*    EXPORTING
+*    #1 = 1 &quot;Row
+*    #2 = 1. &quot;Column
+*
+*
+*  CALL METHOD OF h_excel &apos;Cells&apos; = w_cell2
+*    EXPORTING
+*    #1 = 3 &quot;Row
+*    #2 = 3. &quot;Column
+*
+*
+*
+*  SET PROPERTY OF w_cell1 &apos;Columnwidth&apos; = 15.
+*  SET PROPERTY OF w_cell2 &apos;Columnwidth&apos; = 20.
+*
+*
+*  CALL METHOD OF h_excel &apos;Range&apos; = range
+*    EXPORTING
+*    #1 = w_cell1
+*    #2 = w_cell2.
+*
+*  CALL METHOD OF range &apos;Select&apos;.
+*** Paste data from clipboard to worksheet.
+*  CALL METHOD OF worksheet &apos;Paste&apos;.
+*
+*
+*
+**&amp;---------------------------------------------------------------------*
+**&amp;      Form  line
+**&amp;---------------------------------------------------------------------*
+**        рисую линию
+**----------------------------------------------------------------------*
+FORM line USING sign TYPE string.
+  DATA line TYPE string.
+  WRITE / .
+  DO 50 TIMES.
+    CONCATENATE line sign INTO line.
+  ENDDO.
+  WRITE / line.
+ENDFORM.                    &quot;line</source>
+ </PROG>
+ <PROG NAME="Z88AAKT2" VARCL="X" SUBC="1" RMAND="601" RLOAD="R" FIXPT="X" UCCHECK="X">
+  <textPool>
+   <language SPRAS="R">
+    <textElement ID="I" KEY="001" ENTRY="Параметры выбора" LENGTH="16 "/>
+    <textElement ID="I" KEY="002" ENTRY="icon" LENGTH="4 "/>
+    <textElement ID="I" KEY="003" ENTRY="name" LENGTH="4 "/>
+    <textElement ID="I" KEY="BT1" ENTRY="Очистка" LENGTH="7 "/>
+    <textElement ID="I" KEY="BT2" ENTRY="Сообщение" LENGTH="9 "/>
+    <textElement ID="S" KEY="NAME" ENTRY="        Имя знака" LENGTH="19 "/>
+    <textElement ID="S" KEY="VALUE" ENTRY="        Значение поля I_GROUP" LENGTH="29 "/>
+   </language>
+  </textPool>
+  <dynpros>
+   <dynpro PROG="Z88AAKT2" DNUM="0100" FNUM="0100" BZMX="28 " BZBR="121 " MILI="192 " MICO="37 " MALI="0 " MACO="0 " NOLI="28 " NOCO="121 " VALP="0 " CUAN="G" SPRA="R" DTEXT="Тестовый экран">
+    <dynprofield FNAM="TABLE1" DIDX="0019" FLG1="00" FLG2="00" FLG3="00" FILL="U" FMB1="30" FMB2="00" LENG="78" LINE="04" COLN="03" LANF="00" LBLK="00" LREP="00" AUTH="101" AGLT="01" ADEZ="01"/>
+    <dynprofield FNAM="OK_CODE" DIDX="0000" FLG1="80" FLG2="10" FLG3="00" FMB1="00" FMB2="00" LENG="14" LINE="FF" COLN="01" LTYP="O" LANF="00" LBLK="00" LREP="00" TYPE="CHAR" AGLT="00" ADEZ="00" STXT="____________________"/>
+    <dynproflowsource>PROCESS BEFORE OUTPUT.
+* MODULE STATUS_0100.
+  MODULE PBO.
+*
+PROCESS AFTER INPUT.
+* MODULE USER_COMMAND_0100.
+  MODULE PAI.</dynproflowsource>
+   </dynpro>
+  </dynpros>
+  <pfstatus>
+   <pfstatus_sta CODE="MAIN100" MODAL="D" ACTCODE="000001" PFKCODE="000001" BUTCODE="0001" INT_NOTE="test_shorttext"/>
+   <pfstatus_fun CODE="EXIT" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Назад"/>
+   <pfstatus_fun CODE="EXIT" TEXTNO="002" TEXT_TYPE="S" FUN_TEXT="Выход"/>
+   <pfstatus_fun CODE="EXIT" TEXTNO="003" TEXT_TYPE="S" TEXT_NAME="ICON_CANCEL" ICON_ID="@0W@" FUN_TEXT="Отменить"/>
+   <pfstatus_pfk CODE="000001" PFNO="03" FUNCODE="EXIT" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="12" FUNCODE="EXIT" FUNNO="003"/>
+   <pfstatus_pfk CODE="000001" PFNO="15" FUNCODE="EXIT" FUNNO="002"/>
+   <pfstatus_set STATUS="MAIN100" FUNCTION="EXIT"/>
+   <pfstatus_doc OBJ_TYPE="A" OBJ_CODE="000001" MODAL="D"/>
+   <pfstatus_doc OBJ_TYPE="P" OBJ_CODE="000001" MODAL="D"/>
+   <pfstatus_doc OBJ_TYPE="B" OBJ_CODE="000001" SUB_CODE="0001" MODAL="D"/>
+   <pfstatus_tit CODE="MAIN100" TEXT="Test_title"/>
+  </pfstatus>
+  <source>*&amp;---------------------------------------------------------------------*
+*&amp; Report  Z88AAKT2
+*&amp;
+*&amp;---------------------------------------------------------------------*
+*&amp;
+*&amp; Практическая работа по созданию программы выбора данных из таблицы по условиям заданным на селекционном экране.
+*&amp;---------------------------------------------------------------------*
+
+REPORT  z88aakt2.
+
+DATA: i_group TYPE i,
+     count TYPE i,
+     internal_table LIKE TABLE OF icon,
+     line_table LIKE LINE OF internal_table.
+
+
+
+SELECTION-SCREEN BEGIN OF BLOCK b01 WITH FRAME TITLE text-001.
+PARAMETERS name(30).
+SELECT-OPTIONS value FOR i_group.
+SELECTION-SCREEN END OF BLOCK b01.
+
+SELECTION-SCREEN SKIP.
+SELECTION-SCREEN: PUSHBUTTON 1(10) bt1 USER-COMMAND uc1,
+                  PUSHBUTTON 15(10) bt2 USER-COMMAND uc2.
+
+INITIALIZATION.
+  bt1 = text-bt1.
+  bt2 = text-bt2.
+
+AT SELECTION-SCREEN.
+  TABLES sscrfields.
+  CASE sscrfields.
+    WHEN &apos;UC1&apos;.
+      CLEAR: name, value.
+    WHEN &apos;UC2&apos;.
+      PERFORM count_before_launch.
+
+  ENDCASE.
+
+
+
+START-OF-SELECTION.
+  SELECT * FROM icon INTO TABLE internal_table.
+
+  PERFORM show_table.
+
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  show_table
+*&amp;---------------------------------------------------------------------*
+*      Вывод подходящей информации
+*----------------------------------------------------------------------*
+
+FORM show_table.
+
+  PERFORM count_table.
+
+  IF count NE 0.
+    WRITE: / &apos;Число совпадений: &apos;, count.
+    count = 0.
+  ELSEIF count EQ 0.
+    WRITE &apos;Совпадения не найдены&apos;.
+    EXIT.
+  ENDIF.
+
+
+  DATA: row_number(11) TYPE c VALUE &apos;Номер&apos;,
+        row_name(30)  VALUE &apos;Имя&apos;,
+        row_sign(8) VALUE &apos;Знак&apos;.
+  WRITE: / &apos;|&apos;,row_number,&apos;|&apos;, row_name,&apos;|&apos;, row_sign, &apos;|&apos;.
+  ULINE.
+
+  SORT internal_table BY name.
+
+  LOOP AT internal_table INTO line_table.
+    IF line_table-name CS name.
+      IF line_table-i_group IN value.
+        ADD 1 TO count.
+        WRITE: / &apos;|&apos;, count,&apos;|&apos;,
+                  line_table-name,&apos;|&apos;,
+                  line_table-internal,&apos;|&apos;,
+                  line_table-i_group,&apos;|&apos; .
+        ULINE.
+      ENDIF.
+    ENDIF.
+  ENDLOOP.
+
+
+ENDFORM.                    &quot;show_table
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  read_table_and_count
+*&amp;---------------------------------------------------------------------*
+*       Подсчет подходящих строк
+*----------------------------------------------------------------------*
+FORM count_table.
+
+  count = 0.
+
+  LOOP AT internal_table INTO line_table.
+    IF line_table-name CS name.
+      IF line_table-i_group IN value.
+        ADD 1 TO count.
+      ENDIF.
+    ENDIF.
+  ENDLOOP.
+
+ENDFORM.                    &quot;count_table
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  count_before_launch
+*&amp;---------------------------------------------------------------------*
+*      Подсчет подходящих строк перед запуском
+*----------------------------------------------------------------------*
+FORM count_before_launch.
+
+  DATA: text TYPE string.
+  CONCATENATE &apos;%&apos; name &apos;%&apos; INTO text.
+
+  SELECT COUNT(*) FROM icon INTO count WHERE name LIKE text AND i_group IN value .
+
+  text = count.
+  CONCATENATE &apos;Число совпадений: &apos; text INTO text SEPARATED BY space.
+  MESSAGE: text TYPE &apos;I&apos;.
+ENDFORM.                    &quot;count_before_launch</source>
+ </PROG>
+ <PROG NAME="Z88AAKT3" VARCL="X" SUBC="1" RMAND="601" RLOAD="R" FIXPT="X" UCCHECK="X">
+  <textPool>
+   <language SPRAS="R">
+    <textElement ID="I" KEY="001" ENTRY="Параметры customers" LENGTH="19 "/>
+    <textElement ID="I" KEY="002" ENTRY="customers" LENGTH="9 "/>
+    <textElement ID="I" KEY="003" ENTRY="IS_SHEET" LENGTH="8 "/>
+    <textElement ID="I" KEY="BT1" ENTRY="Очистка" LENGTH="7 "/>
+    <textElement ID="I" KEY="BT2" ENTRY="Совпадения" LENGTH="10 "/>
+    <textElement ID="R" ENTRY="Практическая работа по созданию программы выводящей данные alv Мамаев" LENGTH="69 "/>
+    <textElement ID="S" KEY="P_CITY" ENTRY="        Город" LENGTH="13 "/>
+    <textElement ID="S" KEY="P_NAME" ENTRY="        Имя клиента" LENGTH="19 "/>
+   </language>
+  </textPool>
+  <dynpros>
+   <dynpro PROG="Z88AAKT3" DNUM="0100" FNUM="0100" BZMX="26 " BZBR="116 " MILI="192 " MICO="37 " MALI="0 " MACO="0 " NOLI="27 " NOCO="120 " VALP="0 " CUAN="G" SPRA="R" DTEXT="Главный экран">
+    <dynprofield FNAM="TABLE1" DIDX="0019" FLG1="00" FLG2="00" FLG3="00" FILL="U" FMB1="30" FMB2="00" LENG="72" LINE="02" COLN="04" LANF="00" LBLK="00" LREP="00" AUTH="101" AGLT="01" ADEZ="01"/>
+    <dynprofield FNAM="OK_CODE" DIDX="0000" FLG1="80" FLG2="10" FLG3="00" FMB1="00" FMB2="00" LENG="14" LINE="FF" COLN="01" LTYP="O" LANF="00" LBLK="00" LREP="00" TYPE="CHAR" AGLT="00" ADEZ="00" STXT="____________________"/>
+    <dynproflowsource>PROCESS BEFORE OUTPUT.
+* MODULE STATUS_0100.
+  MODULE PBO.
+*
+PROCESS AFTER INPUT.
+* MODULE USER_COMMAND_0100.
+  MODULE PAI.</dynproflowsource>
+   </dynpro>
+  </dynpros>
+  <pfstatus>
+   <pfstatus_sta CODE="MAIN100" MODAL="D" ACTCODE="000001" PFKCODE="000001" BUTCODE="0001" INT_NOTE="Мамаев ALV Таблица customers"/>
+   <pfstatus_fun CODE="EXIT" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Назад"/>
+   <pfstatus_fun CODE="EXIT" TEXTNO="002" TEXT_TYPE="S" FUN_TEXT="Выход"/>
+   <pfstatus_fun CODE="EXIT" TEXTNO="003" TEXT_TYPE="S" TEXT_NAME="ICON_CANCEL" ICON_ID="@0W@" FUN_TEXT="Отменить"/>
+   <pfstatus_fun CODE="SAVE" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_SYSTEM_SAVE" ICON_ID="@2L@" FUN_TEXT="Сохранить"/>
+   <pfstatus_pfk CODE="000001" PFNO="03" FUNCODE="EXIT" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="11" FUNCODE="SAVE" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="12" FUNCODE="EXIT" FUNNO="003"/>
+   <pfstatus_pfk CODE="000001" PFNO="15" FUNCODE="EXIT" FUNNO="002"/>
+   <pfstatus_set STATUS="MAIN100" FUNCTION="EXIT"/>
+   <pfstatus_set STATUS="MAIN100" FUNCTION="SAVE"/>
+   <pfstatus_doc OBJ_TYPE="A" OBJ_CODE="000001" MODAL="D"/>
+   <pfstatus_doc OBJ_TYPE="P" OBJ_CODE="000001" MODAL="D"/>
+   <pfstatus_doc OBJ_TYPE="B" OBJ_CODE="000001" SUB_CODE="0001" MODAL="D"/>
+   <pfstatus_tit CODE="MAIN100" TEXT="Вывод таблицы customers через ALV. Мамаев"/>
+  </pfstatus>
+  <source>*&amp;---------------------------------------------------------------------*
+*&amp; Report  Z88AAKT3
+*&amp;
+*&amp;---------------------------------------------------------------------*
+*&amp;
+*&amp; Практическая работа по созданию программы содержащей экранные формы, вывод данных в ALV, ввод данных
+*&amp;---------------------------------------------------------------------*
+
+REPORT  z88aakt3.
+
+INCLUDE ole2incl.
+
+DATA:
+     gt_customers TYPE TABLE OF customers,
+     gs_customers LIKE LINE OF gt_customers,
+
+     ok_code LIKE sy-ucomm,
+
+     grid1  TYPE REF TO cl_gui_alv_grid.
+
+
+*----------------------------------------------------------------------*
+*       CLASS lcl_event_handler DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS lcl_event_handler DEFINITION.
+  PUBLIC SECTION.
+    METHODS:
+      on_double_click
+        FOR EVENT double_click OF cl_gui_alv_grid
+          IMPORTING es_row_no
+                    e_column,
+      handle_toolbar
+        FOR EVENT toolbar OF cl_gui_alv_grid
+          IMPORTING e_object e_interactive,
+      handle_user_command
+        FOR EVENT user_command OF cl_gui_alv_grid
+          IMPORTING e_ucomm.
+
+ENDCLASS.                    &quot;lcl_event_handler DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS lcl_event_handler IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS lcl_event_handler IMPLEMENTATION.
+  METHOD on_double_click.
+    DATA: lv_text TYPE string, es_row_string TYPE string.
+    es_row_string = es_row_no-row_id.
+    CONCATENATE &apos;row: &apos; es_row_string &apos;column: &apos; e_column-fieldname INTO lv_text SEPARATED BY space.
+    MESSAGE lv_text TYPE &apos;I&apos;.
+  ENDMETHOD.                    &quot;on_double_click
+
+  METHOD handle_toolbar.
+    PERFORM method_trans_toolbar USING e_object.
+  ENDMETHOD.                    &quot;handle_toolbar
+
+  METHOD handle_user_command.
+    PERFORM method_trans_user_command USING e_ucomm.
+  ENDMETHOD.                    &quot;handle_user_command
+ENDCLASS.                    &quot;lcl_event_handler IMPLEMENTATION
+
+DATA: go_handler TYPE REF TO lcl_event_handler.
+
+SELECTION-SCREEN BEGIN OF BLOCK b01 WITH FRAME TITLE text-001.
+PARAMETERS p_name(15).
+PARAMETERS p_city(15).
+SELECTION-SCREEN END OF BLOCK b01.
+
+SELECTION-SCREEN SKIP.
+SELECTION-SCREEN: PUSHBUTTON 1(10) bt1 USER-COMMAND uc1.
+
+
+INITIALIZATION.
+  bt1 = text-bt1.
+
+AT SELECTION-SCREEN.
+  TABLES sscrfields.
+  CASE sscrfields.
+    WHEN &apos;UC1&apos;.
+      CLEAR: p_name, p_city.
+  ENDCASE.
+
+
+START-OF-SELECTION.
+
+  CREATE OBJECT go_handler.
+
+  CALL FUNCTION &apos;ENQUEUE_EZ88_CUSTOMERS&apos; &quot; Вызов объекта блокировок
+   EXPORTING
+     mode_customers       = &apos;E&apos;
+*     mandt                = sy-mandt
+     id                   = &apos;11111113&apos;
+*     X_ID                 = &apos; &apos;
+*     _SCOPE               = &apos;2&apos;
+*     _WAIT                = &apos;X&apos;
+*     _COLLECT             = &apos; &apos;
+*   EXCEPTIONS
+*     foreign_lock         = 1
+*     system_failure       = 2
+*     OTHERS               = 3.
+.
+
+  IF sy-subrc &lt;&gt; 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+  ENDIF.
+
+  SELECT * FROM customers INTO TABLE gt_customers. &quot;WHERE name LIKE text AND id IN value.
+
+*  CALL FUNCTION &apos;DEQUEUE_EZ88_CUSTOMERS&apos; &quot; Снятие объекта блокировок
+*   EXPORTING
+*     MODE_CUSTOMERS       = &apos;E&apos;
+*     MANDT                = SY-MANDT
+*     ID                   =
+*     X_ID                 = &apos; &apos;
+*     _SCOPE               = &apos;3&apos;
+*     _SYNCHRON            = &apos; &apos;
+*     _COLLECT             = &apos; &apos;
+  .
+
+  LOOP AT gt_customers INTO gs_customers. &quot; Вывод таблицы согласно параметрам отбора.
+    IF gs_customers-name CS p_name AND gs_customers-city CS p_city.
+    ELSE.
+      DELETE gt_customers INDEX sy-tabix.
+    ENDIF.
+  ENDLOOP.
+
+
+  CALL SCREEN 100.
+
+*---------------------------------------------------------------------*
+*       MODULE PBO OUTPUT                                             *
+*---------------------------------------------------------------------*
+MODULE pbo OUTPUT.
+
+  DATA:ls_layout TYPE disvariant,
+       lt_sort TYPE lvc_t_sort,
+       ls_sort TYPE lvc_s_sort,
+       lv_repid LIKE sy-repid,
+
+       lt_fieldcat TYPE lvc_t_fcat,
+       ls_fieldcat TYPE lvc_s_fcat.
+
+  CLEAR ls_layout.  &quot; Редоктирование шаблона вывода alv.
+  lv_repid = sy-repid.
+  ls_layout-report = lv_repid.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;NAME&apos;. &quot; Внутреннее имя столбца
+  ls_fieldcat-reptext = &apos;Новое имя тест&apos;. &quot; Изменение выводимого имени столбца
+  ls_fieldcat-emphasize = &apos;X&apos;. &quot; Цветовое выделение
+  ls_fieldcat-edit = &apos;X&apos;.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;CITY&apos;.
+  ls_fieldcat-outputlen = 10. &quot; Изменение длинны
+  ls_fieldcat-edit = &apos;X&apos;. &quot; Редактировать столбец
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;CUSTTYPE&apos;.
+  ls_fieldcat-no_out = &apos;X&apos;.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;ID&apos;.
+  ls_fieldcat-key = &apos;X&apos;.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;TELEPHONE&apos;.
+  ls_fieldcat-edit = &apos;X&apos;.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+
+  ls_sort-fieldname = &apos;ID&apos;.
+  APPEND ls_sort TO lt_sort.
+
+
+  SET PF-STATUS &apos;MAIN100&apos;.
+  SET TITLEBAR &apos;MAIN100&apos;.
+  CREATE OBJECT grid1
+    EXPORTING
+      i_parent = cl_gui_custom_container=&gt;screen0.
+
+  SET HANDLER go_handler-&gt;on_double_click FOR grid1.
+  SET HANDLER go_handler-&gt;handle_toolbar FOR grid1.
+  SET HANDLER go_handler-&gt;handle_user_command FOR grid1.
+
+
+  CALL METHOD grid1-&gt;set_table_for_first_display
+    EXPORTING
+      i_structure_name = &apos;customers&apos;(002)
+      is_variant       = ls_layout
+    CHANGING
+      it_fieldcatalog  = lt_fieldcat
+      it_sort          = lt_sort
+      it_outtab        = gt_customers.
+
+ENDMODULE.                    &quot;pbo OUTPUT
+
+*---------------------------------------------------------------------*
+*       MODULE PAI INPUT                                              *
+*---------------------------------------------------------------------*
+MODULE pai INPUT.
+  CASE ok_code.
+    WHEN &apos;EXIT&apos;.
+      PERFORM exit_program.
+    WHEN &apos;SAVE&apos;.
+      PERFORM save_table TABLES gt_customers.
+  ENDCASE.
+  CLEAR ok_code.
+ENDMODULE.                    &quot;pai INPUT
+*---------------------------------------------------------------------*
+*       FORM EXIT_PROGRAM                                             *
+*---------------------------------------------------------------------*
+FORM exit_program.
+*****  CALL METHOD custom_container-&gt;free.
+  LEAVE TO SCREEN 0.
+ENDFORM.                    &quot;exit_program
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  save_table
+*&amp;---------------------------------------------------------------------*
+*       Сохранение таблицы
+*----------------------------------------------------------------------*
+FORM save_table TABLES it_customers.
+
+  DATA: lv_flag_delete(1),
+        lt_customers TYPE TABLE OF customers,
+        ls_customers LIKE LINE OF lt_customers,
+        ls_it_customers LIKE ls_customers.
+
+  MOVE it_customers[] TO lt_customers[].
+
+  CALL METHOD grid1-&gt;check_changed_data. &quot; Обновить данные с экрана в переданную таблицу
+
+  LOOP AT lt_customers INTO ls_customers. &quot; Удаление строк
+    lv_flag_delete = &apos;X&apos;.
+    LOOP AT it_customers INTO ls_it_customers.
+      IF ls_customers-id = ls_it_customers-id.
+        CLEAR: lv_flag_delete.
+        EXIT.
+      ENDIF.
+    ENDLOOP.
+    IF lv_flag_delete = &apos;X&apos;.
+      DELETE FROM customers WHERE id = ls_customers-id.
+    ENDIF.
+  ENDLOOP.
+
+  DATA lv_max_id LIKE ls_it_customers-id.
+
+  LOOP AT it_customers INTO ls_it_customers. &quot; Изменение строк
+    IF ls_it_customers-id = 00000000. &quot; Назначение ID
+      SELECT MAX( id ) FROM customers INTO lv_max_id.
+      ADD 1 TO lv_max_id.
+      ls_it_customers-id = lv_max_id.
+      MODIFY it_customers FROM ls_it_customers.
+    ENDIF.
+    MODIFY customers FROM ls_it_customers.
+
+  ENDLOOP.
+
+  CALL METHOD grid1-&gt;refresh_table_display.
+
+  IF  sy-subrc EQ 0.
+    MESSAGE &apos;Изменения успешно сохранены&apos; TYPE &apos;S&apos;.
+  ENDIF.
+
+
+ENDFORM.                    &quot;save_table
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  METHOD_TRANS_TOOLBAR
+*&amp;---------------------------------------------------------------------*
+*       Создание кнопки
+*----------------------------------------------------------------------*
+*      --&gt;P_E_OBJECT text
+*----------------------------------------------------------------------*
+FORM method_trans_toolbar USING p_e_object TYPE REF TO cl_alv_event_toolbar_set.
+  DATA: ty_toolbar TYPE stb_button.
+
+* разделитель
+  CLEAR ty_toolbar.
+  ty_toolbar-butn_type = 3.
+  APPEND ty_toolbar TO p_e_object-&gt;mt_toolbar.
+
+* кнопка
+  CLEAR ty_toolbar.
+  ty_toolbar-function = &apos;Exel&apos;.
+  ty_toolbar-icon = icon_history.
+  ty_toolbar-butn_type = 0.
+  ty_toolbar-text = &apos;Сохранить в Exel&apos;.
+
+  APPEND ty_toolbar TO p_e_object-&gt;mt_toolbar.
+ENDFORM.                    &quot;METHOD_TRANS_TOOLBAR
+
+* Обработка команд кнопки в toolbar
+FORM method_trans_user_command USING p_e_ucomm TYPE sy-ucomm.
+  CASE p_e_ucomm.
+    WHEN &apos;Exel&apos;.
+      PERFORM send_to_exel TABLES gt_customers CHANGING gs_customers.
+  ENDCASE.
+ENDFORM.                    &quot;METHOD_TRANS_USER_COMMAND
+
+
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  send_to_exel
+*&amp;---------------------------------------------------------------------*
+*       Сохранение таблиц в Exel
+*----------------------------------------------------------------------*
+*      --&gt;IT_CUSTOMERS  Внутренняя таблица customers
+*      --&gt;IS_CUSTOMERS  Структура таблицы IT_CUSTOMERS
+*----------------------------------------------------------------------*
+FORM send_to_exel TABLES it_customers CHANGING is_customers TYPE customers.
+
+  DATA:
+        lo_excel   TYPE ole2_object, &quot; Excel object            &quot; Обьекты OLE
+        lo_sheets  TYPE ole2_object, &quot; list of workbooks
+        lo_sheet   TYPE ole2_object, &quot; workbook
+
+        lo_sheet1  TYPE ole2_object, &quot;First sheet
+        lo_sheet2  TYPE ole2_object. &quot;Second Sheet
+
+
+  TYPES: lv_data(1500) TYPE c,          &quot;  Таблица строк для записи в Exel
+     lt_data TYPE TABLE OF lv_data.
+
+  DATA: lt_customers_excel1 TYPE lt_data,
+        lt_customers_excel2 TYPE lt_data,
+        lv_deli(1) TYPE c,
+        lv_temp TYPE string.
+
+  lv_deli = cl_abap_char_utilities=&gt;horizontal_tab.         &quot; Разделитель
+
+  CONCATENATE &apos;ID&apos; lv_deli &apos;Имя&apos; lv_deli &apos;Город&apos; INTO lv_temp.
+  APPEND lv_temp TO lt_customers_excel1.
+  CLEAR lv_temp.
+
+  LOOP AT it_customers INTO is_customers.  &quot; Преобразуем нужные столбцы внутренней таблицы в таблицу строк
+    CONCATENATE is_customers-id lv_deli is_customers-name lv_deli is_customers-city INTO lv_temp.
+    APPEND lv_temp TO lt_customers_excel1.
+    CLEAR lv_temp.
+  ENDLOOP.
+
+  CONCATENATE &apos;Имя&apos; lv_deli &apos;Телефон&apos; INTO lv_temp.
+  APPEND lv_temp TO lt_customers_excel2.
+  CLEAR lv_temp.
+
+  LOOP AT it_customers INTO is_customers.  &quot; Преобразуем нужные столбцы внутренней таблицы в таблицу строк
+    CONCATENATE is_customers-name lv_deli is_customers-telephone INTO lv_temp.
+    APPEND lv_temp TO lt_customers_excel2.
+    CLEAR lv_temp.
+  ENDLOOP.
+
+  IF lo_excel-header = space OR lo_excel-handle = -1.
+    CREATE OBJECT lo_excel &apos;EXCEL.APPLICATION&apos;.
+  ENDIF.
+
+*--- get list of workbooks, initially empty
+  CALL METHOD OF lo_excel &apos;Workbooks&apos; = lo_sheets.
+  SET PROPERTY OF lo_excel &apos;Visible&apos; = 1.
+  CALL METHOD OF lo_sheets &apos;Add&apos; = lo_sheet.
+
+  PERFORM create_sheet TABLES lt_customers_excel2 USING &apos;CUSTOMERS Телефоны&apos; lo_sheet2 &apos;B&apos; 2 lo_excel.
+  PERFORM create_sheet TABLES lt_customers_excel1 USING &apos;Таблица CUSTOMERS&apos; lo_sheet1 &apos;C&apos; 3 lo_excel.
+
+ENDFORM.                    &quot;send_to_exel
+
+
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  create_sheet
+*&amp;---------------------------------------------------------------------*
+*       Создание страницы
+*----------------------------------------------------------------------*
+*      --&gt;IT_SHEET   Внутрення таблица
+*      --&gt;IV_NAME    Имя страницы
+*      --&gt;IV_SHEET   Рабочая книга Excel
+*      --&gt;COLUMN     Имя послднего столбца
+*      --&gt;IV_NUMBER_COLUMN  Количество столбцов
+*      --&gt;IO_EXCEL          Excel application
+*----------------------------------------------------------------------*
+FORM create_sheet TABLES it_sheet
+                  USING iv_name
+                        io_sheet TYPE ole2_object
+                        iv_column TYPE c
+                        iv_number_column TYPE i
+                        io_excel.
+
+  DATA: lo_sheet   TYPE ole2_object,
+        lo_worksheet TYPE ole2_object, &quot;Worksheet
+        lv_rc TYPE i,
+
+        lo_cell  TYPE ole2_object, &quot;cell
+        lo_cell1 TYPE ole2_object,
+        lo_cell2 TYPE ole2_object,
+        lo_cell3 TYPE ole2_object,
+
+        lo_range   TYPE ole2_object, &quot;Range
+        lo_borders TYPE ole2_object, &quot;Borders
+        lo_font TYPE ole2_object. &quot;Font
+
+
+  GET PROPERTY OF io_excel &apos;Sheets&apos; = io_sheet .
+
+  GET PROPERTY OF io_sheet &apos;Add&apos; = lo_sheet.
+
+  GET PROPERTY OF io_excel &apos;ACTIVESHEET&apos; = lo_worksheet.
+
+  SET PROPERTY OF lo_worksheet &apos;Name&apos; = iv_name. &quot; Имя страницы
+
+  CALL METHOD cl_gui_frontend_services=&gt;clipboard_export &quot; Copy data in clipboard
+   IMPORTING
+     data                 = it_sheet[]
+   CHANGING
+     rc                   = lv_rc
+   EXCEPTIONS
+     cntl_error           = 1
+     error_no_gui         = 2
+     not_supported_by_gui = 3
+     OTHERS               = 4.
+
+
+  CALL METHOD OF io_excel &apos;Cells&apos; = lo_cell1
+    EXPORTING
+    #1 = 1 &quot;Row
+    #2 = 1. &quot;Column
+
+
+  CALL METHOD OF io_excel &apos;Cells&apos; = lo_cell2
+    EXPORTING
+    #1 = 1 &quot;Row
+    #2 = 1. &quot;Column
+
+  CALL METHOD OF io_excel &apos;Cells&apos; = lo_cell3
+    EXPORTING
+    #1 = 1 &quot;Row
+    #2 = 2. &quot;Column
+
+
+
+  SET PROPERTY OF lo_cell1 &apos;Columnwidth&apos; = 8.
+  SET PROPERTY OF lo_cell3 &apos;Columnwidth&apos; = 15.
+
+
+  CALL METHOD OF io_excel &apos;Range&apos; = lo_range
+    EXPORTING
+    #1 = lo_cell1
+    #2 = lo_cell2.
+
+  CALL METHOD OF lo_range &apos;Select&apos;.
+** Paste data from clipboard to worksheet.
+  CALL METHOD OF lo_worksheet &apos;Paste&apos;.
+
+
+
+*Logic to assign borders to fetched data in worksheet.
+
+  DATA: i TYPE i,
+        count_internal_talbe TYPE i,
+        i_string TYPE string,
+        first TYPE string,
+        second TYPE string.
+
+  count_internal_talbe = LINES( gt_customers ).
+  ADD 1 TO count_internal_talbe.
+
+  DO count_internal_talbe TIMES.
+    i = i + 1.
+    i_string = i.
+    CONCATENATE &apos;A&apos; i_string INTO first. &quot;Column from where you want to start providing borders.
+    CONCATENATE iv_column i_string INTO second. &quot;Column up to which you want to provide the borders.
+
+**Make range of selected columns.
+    CALL METHOD OF io_excel &apos;Range&apos; = lo_range
+      EXPORTING
+      #1 = first
+      #2 = second.
+
+**Logic to assign border on left side.
+    CALL METHOD OF lo_range &apos;Borders&apos; = lo_borders &quot;NO FLUSH
+    EXPORTING #1 = 7. &quot;7 for left side
+    SET PROPERTY OF lo_borders &apos;LineStyle&apos; = 1. &quot;type of line.
+
+**Logic to assign border on right side.
+    CALL METHOD OF lo_range &apos;Borders&apos; = lo_borders &quot;NO FLUSH
+    EXPORTING #1 = 8.
+    SET PROPERTY OF lo_borders &apos;LineStyle&apos; = 1.
+
+**Logic to assign border on top side.
+    CALL METHOD OF lo_range &apos;Borders&apos; = lo_borders &quot;NO FLUSH
+    EXPORTING #1 = 9.
+    SET PROPERTY OF lo_borders &apos;LineStyle&apos; = 1.
+
+**Logic to assign border on bottom side.
+    CALL METHOD OF lo_range &apos;Borders&apos; = lo_borders &quot;NO FLUSH
+    EXPORTING #1 = 10.
+    SET PROPERTY OF lo_borders &apos;LineStyle&apos; = 1.
+
+**Logic to assign border on vertical side.
+    CALL METHOD OF lo_range &apos;Borders&apos; = lo_borders &quot;NO FLUSH
+    EXPORTING #1 = 11.
+    SET PROPERTY OF lo_borders &apos;LineStyle&apos; = 1.
+
+**Logic to assign border on horizontal side.
+    CALL METHOD OF lo_range &apos;Borders&apos; = lo_borders &quot;NO FLUSH
+    EXPORTING #1 = 12.
+    SET PROPERTY OF lo_borders &apos;LineStyle&apos; = 1.
+
+  ENDDO.
+
+* Logic to change font and color of header data.
+  CLEAR i.
+
+
+  DO iv_number_column TIMES.
+    i = i + 1.
+    CALL METHOD OF io_excel &apos;CELLS&apos; = lo_cell  &quot;NO FLUSH
+       EXPORTING #1 = 1
+                 #2 = i.
+
+
+
+    GET PROPERTY OF lo_cell &apos;FONT&apos; = lo_font. &quot;NO FLUSH.
+
+    SET PROPERTY OF lo_font &apos;BOLD&apos; = 1. &quot;NO FLUSH.
+
+    SET PROPERTY OF lo_font &apos;SIZE&apos; = 12.
+
+    CALL METHOD OF lo_cell &apos;INTERIOR&apos; = lo_range.
+
+    SET PROPERTY OF lo_range &apos;ColorIndex&apos; = 4.
+
+    SET PROPERTY OF lo_range &apos;Pattern&apos; = 1.
+  ENDDO.
+
+
+
+  IF  sy-subrc EQ 0.
+    MESSAGE &apos;Экспорт данных в Exel успешно завершен&apos; TYPE &apos;S&apos;.
+  ENDIF.
+ENDFORM.                    &quot;create_sheet</source>
+ </PROG>
+ <PROG NAME="Z88AAKT4" VARCL="X" SUBC="1" RMAND="601" RLOAD="R" FIXPT="X" UCCHECK="X">
+  <textPool>
+   <language SPRAS="R">
+    <textElement ID="I" KEY="001" ENTRY="Загрузка файла в ЕКАСУД" LENGTH="132 "/>
+    <textElement ID="R" ENTRY="Практическая работа по работе с WEB-сервисами. Мамаев" LENGTH="53 "/>
+    <textElement ID="S" KEY="P_FILE" ENTRY="        Файл" LENGTH="12 "/>
+   </language>
+  </textPool>
+  <source>*&amp;---------------------------------------------------------------------*
+*&amp; Report  Z88AAKT4
+*&amp;
+*&amp;---------------------------------------------------------------------*
+*&amp;
+*&amp; Практическая работа по работе с WEB-сервисами. Мамаев
+*&amp;---------------------------------------------------------------------*
+
+REPORT  z88aakt4.
+
+SELECTION-SCREEN BEGIN OF BLOCK b01 WITH FRAME TITLE text-001.
+PARAMETERS: p_file TYPE rlgrap-filename.
+SELECTION-SCREEN END OF BLOCK b01.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_file.
+  CALL FUNCTION &apos;F4_FILENAME&apos;
+    EXPORTING
+      field_name = &apos;P_FILE&apos;
+    IMPORTING
+      file_name  = p_file.
+
+START-OF-SELECTION.
+
+  IF sy-mandt EQ 301.
+    PERFORM send_file USING p_file.
+  ELSE.
+    DATA gt_text TYPE string.
+    CONCATENATE &apos;Вы в&apos; sy-mandt &apos;выполнять только в 301&apos; INTO gt_text SEPARATED BY space.
+    MESSAGE gt_text TYPE &apos;E&apos;.
+  ENDIF.
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  send_file
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM send_file USING iv_file.
+
+  DATA: lv_x_file TYPE xstring,
+        lv_file TYPE string,
+        lt_data  TYPE TABLE OF sotr_txt,
+        lv_tablesize  TYPE i,
+
+        lv_name_file TYPE string,
+
+        lt_split_name TYPE TABLE OF string,
+        lv_last_line TYPE p.
+
+lv_file = iv_file.
+
+  CALL FUNCTION &apos;GUI_UPLOAD&apos;
+    EXPORTING
+      filename   = lv_file
+      filetype   = &apos;BIN&apos;
+    IMPORTING
+      filelength = lv_tablesize
+    TABLES
+      data_tab   = lt_data
+    EXCEPTIONS
+      OTHERS     = 11.
+
+  IF sy-subrc NE 0.
+    WRITE: / &apos;Ошибка загрузки файла&apos;.
+    EXIT.
+  ENDIF.
+
+
+  SPLIT iv_file AT &apos;\&apos; INTO TABLE lt_split_name.
+
+  DESCRIBE TABLE lt_split_name LINES lv_last_line.
+
+  READ TABLE lt_split_name INDEX lv_last_line INTO lv_name_file.
+
+  WRITE: / lv_name_file.
+
+
+  CALL FUNCTION &apos;SCMS_BINARY_TO_XSTRING&apos;
+    EXPORTING
+      input_length = lv_tablesize
+    IMPORTING
+      buffer       = lv_x_file
+    TABLES
+      binary_tab   = lt_data.
+*    EXCEPTIONS
+*      failed        = 1
+*      others        = 2
+  .
+
+
+  PERFORM ekasud USING lv_x_file lv_name_file.
+
+ENDFORM.                    &quot;send_file
+&quot;----------------------------------------------------------------------
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  ekasud
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      --&gt;IV_X_FILE  text
+*----------------------------------------------------------------------*
+FORM ekasud USING iv_x_file iv_name_file .
+
+  DATA: lo_ekasud_svc TYPE REF TO  z88_ws_uedo_co_document_servic,
+
+        ls_input_session TYPE z88_ws_uedo_create_session1,
+        ls_output_session TYPE z88_ws_uedo_create_session_re1,
+
+        ls_employee TYPE z88_ws_uedo_employee,
+        lv_uuid_session TYPE string,
+
+        lt_error LIKE ls_output_session-parameters-output-errors-error,
+        ls_error LIKE LINE OF lt_error,
+
+        ls_input_case TYPE z88_ws_uedo_create_case1,
+        ls_output_case TYPE z88_ws_uedo_create_case_respo1,
+        lv_id_case LIKE ls_output_case-parameters-output-id,
+
+        ls_input_document TYPE z88_ws_uedo_create_document1,
+        ls_output_document TYPE z88_ws_uedo_create_document_r1,
+        lv_id_document LIKE ls_output_document-parameters-output-id,
+
+        lt_property LIKE ls_input_document-parameters-input-document-properties-property,
+        ls_property LIKE LINE OF lt_property,
+
+        ls_input_add_document TYPE z88_ws_uedo_add_document_to_c2,
+        ls_output_add_document TYPE z88_ws_uedo_add_document_to_c1,
+
+        ls_input_get_url TYPE z88_ws_uedo_get_document_url1,
+        ls_output_get_url TYPE z88_ws_uedo_get_document_url_1.
+
+
+  CREATE OBJECT lo_ekasud_svc
+    EXPORTING
+      logical_port_name = &apos;EKASUD1&apos;.
+
+  ls_employee-id = sy-uname.
+  ls_employee-name = &apos;TEST_NAME&apos;.
+  ls_employee-department = &apos;TEST_DEPARTMENT&apos;.
+  ls_employee-position = &apos;-&apos;.
+  ls_employee-email = &apos;-&apos;.
+  ls_employee-ip = &apos;-&apos;.
+
+  ls_input_session-parameters-input-employee = ls_employee.
+
+  CALL METHOD lo_ekasud_svc-&gt;create_session
+    EXPORTING
+      input  = ls_input_session
+    IMPORTING
+      output = ls_output_session.
+
+  lt_error = ls_output_session-parameters-output-errors-error .
+
+  LOOP AT lt_error INTO ls_error.
+    WRITE: / ls_error-text.
+  ENDLOOP.
+
+  lv_uuid_session = ls_output_session-parameters-output-uuid.
+
+  WRITE: / &apos;Номер сессии: &apos;, lv_uuid_session.
+
+  ls_input_case-parameters-input-uuid = lv_uuid_session.
+
+  ls_input_case-parameters-input-case-name = &apos;TEST_NAME_CASE&apos;.
+  ls_input_case-parameters-input-case-class_name = &apos;EdoCaseUZEDO&apos;.
+
+
+  CALL METHOD lo_ekasud_svc-&gt;create_case
+    EXPORTING
+      input  = ls_input_case
+    IMPORTING
+      output = ls_output_case.
+
+  CLEAR lt_error.
+
+  lt_error = ls_output_case-parameters-output-errors-error.
+
+  LOOP AT lt_error INTO ls_error.
+    WRITE: / ls_error-text.
+  ENDLOOP.
+
+  lv_id_case = ls_output_case-parameters-output-id.
+
+  WRITE: / &apos;ID Пакета: &apos;, lv_id_case.
+
+  &quot;-----------------------------------------------------------------------
+
+  ls_input_document-parameters-input-uuid = lv_uuid_session.
+
+  ls_input_document-parameters-input-document-name = iv_name_file.
+  ls_input_document-parameters-input-document-class_name = &apos;EdoASV&apos;. &quot;класс для акта сверки, если какие-то произвольные документы то EdoDocument
+  ls_input_document-parameters-input-document-type = &apos;ASV&apos;.
+
+  ls_input_document-parameters-input-document-content-data = iv_x_file.&quot;  - собственно сам документ в двоичном виде
+  ls_input_document-parameters-input-document-content-name = iv_name_file.
+
+
+  CLEAR: ls_property.
+  ls_property-name = &apos;EdoBURKSAuth&apos;.
+  ls_property-type = &apos;xs:string&apos;.
+  ls_property-value = 0001.
+
+  APPEND ls_property TO lt_property.
+
+  ls_input_document-parameters-input-document-properties-property = lt_property.
+
+  CALL METHOD lo_ekasud_svc-&gt;create_document
+    EXPORTING
+      input  = ls_input_document
+    IMPORTING
+      output = ls_output_document.
+
+  CLEAR lt_error.
+
+  lt_error = ls_output_document-parameters-output-errors-error.
+
+  LOOP AT lt_error INTO ls_error.
+    WRITE: / ls_error-text.
+  ENDLOOP.
+
+  lv_id_document = ls_output_document-parameters-output-id..
+  WRITE: / &apos;ID Документа: &apos;, lv_id_document.
+
+  &quot;----------------------------------------------------------------
+
+  ls_input_add_document-parameters-input-uuid = lv_uuid_session.&quot; сессия.
+  ls_input_add_document-parameters-input-id = lv_id_document.
+  ls_input_add_document-parameters-input-case_id = lv_id_case.
+
+
+  CALL METHOD lo_ekasud_svc-&gt;add_document_to_case
+    EXPORTING
+      input  = ls_input_add_document
+    IMPORTING
+      output = ls_output_add_document.
+
+  &quot;-----------------------------------------------------------------
+
+  ls_input_get_url-parameters-input-uuid = lv_uuid_session.
+  ls_input_get_url-parameters-input-id = lv_id_document.
+
+  CALL METHOD lo_ekasud_svc-&gt;get_document_url
+    EXPORTING
+      input  = ls_input_get_url
+    IMPORTING
+      output = ls_output_get_url.
+
+  ULINE.
+  WRITE:/ ls_output_get_url-parameters-output-url.
+
+  CALL FUNCTION &apos;ZEKASUD_CALL_BROWSER&apos;
+    EXPORTING
+      url           = ls_output_get_url-parameters-output-url
+    EXCEPTIONS
+      error_session = 1
+      error_connect = 2
+      error_get_url = 3
+      OTHERS        = 4.
+
+  ls_input_get_url-parameters-input-id = lv_id_case.
+
+  CALL METHOD lo_ekasud_svc-&gt;get_case_url
+    EXPORTING
+      input  = ls_input_get_url
+    IMPORTING
+      output = ls_output_get_url.
+
+  WRITE:/ ls_output_get_url-parameters-output-url.
+
+  CALL FUNCTION &apos;ZEKASUD_CALL_BROWSER&apos;
+    EXPORTING
+      url           = ls_output_get_url-parameters-output-url
+    EXCEPTIONS
+      error_session = 1
+      error_connect = 2
+      error_get_url = 3
+      OTHERS        = 4.
+
+ENDFORM.                    &quot;ekasud</source>
+ </PROG>
+ <PROG NAME="Z88AAKT5" VARCL="X" SUBC="1" RMAND="601" RLOAD="R" FIXPT="X" UCCHECK="X">
+  <textPool>
+   <language SPRAS="R">
+    <textElement ID="R" ENTRY="Практическая работа simple transformation и xlt transformation Мамаев" LENGTH="69 "/>
+   </language>
+  </textPool>
+  <source>*&amp;---------------------------------------------------------------------*
+*&amp; Report  Z88AAKT5
+*&amp;
+*&amp;---------------------------------------------------------------------*
+*&amp;
+*&amp; Практическая работа simple transformation и xlt transformation Мамаев
+*&amp;---------------------------------------------------------------------*
+
+REPORT  z88aakt5.
+
+DATA lv_xml  TYPE string.
+
+DATA: BEGIN OF struct,
+        name1 TYPE string,
+        name2 TYPE string,
+END OF struct.
+
+DATA: all_customers LIKE TABLE OF customers,
+      customer LIKE LINE OF all_customers.
+
+DATA: BEGIN OF xml_customer,
+      name LIKE customer-name,
+      city LIKE customer-city,
+END OF xml_customer.
+
+DATA: xml_customers LIKE TABLE OF xml_customer.
+
+
+struct-name1 = &apos;Mike&apos;.
+struct-name2 = &apos;Leningradkaya St&apos;.
+
+CALL TRANSFORMATION z88_test_z88aakt5_st
+      SOURCE struct = struct
+             xml_customers = xml_customers
+      RESULT XML lv_xml.
+
+WRITE lv_xml.
+
+SKIP. CLEAR struct.
+
+CALL TRANSFORMATION z88_test_z88aakt5_st
+     SOURCE XML lv_xml
+     RESULT struct = struct
+            xml_customers = xml_customers.
+
+WRITE: / struct-name1,
+         struct-name2.
+
+&quot;----------------------------------------------------
+
+
+START-OF-SELECTION.
+
+
+  SELECT * FROM customers INTO TABLE all_customers.
+
+
+  LOOP AT all_customers INTO customer.
+    xml_customer-name = customer-name.
+    xml_customer-city = customer-city.
+    APPEND xml_customer TO xml_customers.
+    CLEAR xml_customer.
+  ENDLOOP.
+
+  ULINE.
+  LOOP AT all_customers INTO customer.
+    WRITE: / customer-name, customer-city.
+  ENDLOOP.
+
+  TRY.
+      CALL TRANSFORMATION z88_test_z88aakt5_st
+            SOURCE xml_customers = xml_customers
+                   struct = struct
+            RESULT XML lv_xml.
+      WRITE lv_xml.
+
+    CATCH cx_st_error.
+      WRITE: / &apos;ERROR&apos;.
+  ENDTRY.
+
+
+
+
+  SKIP. CLEAR: xml_customers, struct.
+
+  TRY.
+      CALL TRANSFORMATION z88_test_z88aakt5_st
+           SOURCE XML lv_xml
+           RESULT xml_customers = xml_customers
+                  struct = struct.
+
+      LOOP AT xml_customers INTO xml_customer.
+        WRITE: / xml_customer-name, xml_customer-city.
+      ENDLOOP.
+
+    CATCH cx_st_error.
+      WRITE: / &apos;ERROR&apos;.
+  ENDTRY.
+  &quot;---------------------------------------------------------------------
+  ULINE.
+  DATA: str TYPE string,
+            xml TYPE string,
+            len TYPE i,
+            text TYPE string.
+
+  str = `     `.
+  len = STRLEN( str ).
+
+  CALL TRANSFORMATION id SOURCE node = str
+                         RESULT XML xml.
+  WRITE: / len, xml .
+  CALL TRANSFORMATION id SOURCE XML xml
+                         RESULT node = str.
+  len = STRLEN( str ).
+  WRITE: / len, str .
+
+  &quot;--------------------------------------------------------------------
+  ULINE.
+  SKIP.
+
+
+  CALL TRANSFORMATION id SOURCE all_customers = all_customers
+                         RESULT XML lv_xml.
+  CLEAR all_customers.
+  CALL TRANSFORMATION id SOURCE XML lv_xml
+                         RESULT all_customers = all_customers.
+
+  WRITE lv_xml.
+
+  LOOP AT all_customers INTO customer.
+    WRITE: / customer.
+  ENDLOOP.
+
+
+  &quot;------------------------------------------------------------------</source>
+ </PROG>
+ <PROG NAME="Z88AAKT6" VARCL="X" SUBC="1" RMAND="601" RLOAD="R" FIXPT="X" UCCHECK="X">
+  <textPool>
+   <language SPRAS="R">
+    <textElement ID="I" KEY="001" ENTRY="Динамический SQL" LENGTH="132 "/>
+    <textElement ID="I" KEY="002" ENTRY="Вызов подпрограмм" LENGTH="132 "/>
+    <textElement ID="I" KEY="003" ENTRY="Создание временных программ" LENGTH="132 "/>
+    <textElement ID="I" KEY="004" ENTRY="Тест FIELD-SYMBOLS" LENGTH="18 "/>
+    <textElement ID="I" KEY="BT1" ENTRY="BDC" LENGTH="3 "/>
+    <textElement ID="R" ENTRY="Практическая работа по динамическому программированию. Мамаев" LENGTH="61 "/>
+    <textElement ID="S" KEY="P_FILE" ENTRY="        Файл программы с формой &apos;test&apos;" LENGTH="38 "/>
+    <textElement ID="S" KEY="P_SIGN" ENTRY="        Символ" LENGTH="14 "/>
+    <textElement ID="S" KEY="P_TABLE" ENTRY="        Имя таблицы базы данных" LENGTH="31 "/>
+    <textElement ID="S" KEY="P_TEXT" ENTRY="        Текст для временной программы" LENGTH="37 "/>
+    <textElement ID="S" KEY="P_VARI" ENTRY="        Любой текст" LENGTH="19 "/>
+   </language>
+  </textPool>
+  <source>*&amp;---------------------------------------------------------------------*
+*&amp; Report  Z88AAKT6
+*&amp;
+*&amp;---------------------------------------------------------------------*
+*&amp;
+*&amp; Практическая работа по динамическому программированию. Мамаев
+*&amp;---------------------------------------------------------------------*
+
+REPORT  z88aakt6.
+
+SELECTION-SCREEN BEGIN OF BLOCK b01 WITH FRAME TITLE text-001.
+PARAMETERS p_table(10) DEFAULT &apos;customers&apos;.
+SELECTION-SCREEN END OF BLOCK b01.
+
+SELECTION-SCREEN BEGIN OF BLOCK b02 WITH FRAME TITLE text-002.
+PARAMETERS p_sign TYPE string.
+SELECTION-SCREEN END OF BLOCK b02.
+
+SELECTION-SCREEN BEGIN OF BLOCK b03 WITH FRAME TITLE text-003.
+PARAMETERS: p_file TYPE rlgrap-filename.
+PARAMETERS: p_text TYPE string.
+SELECTION-SCREEN END OF BLOCK b03.
+
+SELECTION-SCREEN BEGIN OF BLOCK b04 WITH FRAME TITLE text-004.
+PARAMETERS: p_vari TYPE string.
+SELECTION-SCREEN END OF BLOCK b04.
+
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_file.
+  CALL FUNCTION &apos;F4_FILENAME&apos;
+    EXPORTING
+      field_name = &apos;P_FILE&apos;
+    IMPORTING
+      file_name  = p_file.
+
+START-OF-SELECTION.
+
+  PERFORM dinamic_sql USING p_table.
+  ULINE.
+  PERFORM external_form USING p_sign.
+  ULINE.
+  PERFORM file_program USING p_file.
+  ULINE.
+  PERFORM temporal_program USING p_text.
+  ULINE.
+  PERFORM test_field-symbols USING p_table p_vari.
+  ULINE.
+  PERFORM rtts USING p_table.
+
+
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  external_form
+*&amp;---------------------------------------------------------------------*
+*       Вызов подпрограммы ищ другой программы
+*----------------------------------------------------------------------*
+FORM external_form USING iv_sign.
+  WRITE: / &apos;Вызов формы из другой программы:&apos; COLOR 3.
+  IF iv_sign IS NOT INITIAL.
+    PERFORM line IN PROGRAM z88aakt1 USING iv_sign. &quot;Вызвать форму из другой программы
+  ELSE.
+    WRITE: / &apos;Символ не указан&apos; COLOR 6.
+  ENDIF.
+ENDFORM.                    &quot;external_form
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  temporal_program
+*&amp;---------------------------------------------------------------------*
+*       Создание временной программы
+*----------------------------------------------------------------------*
+*      --&gt;IV_TEXT    Любой текст
+*----------------------------------------------------------------------*
+FORM temporal_program USING iv_text TYPE string.
+  WRITE: / &apos;Тест Создание временной подпрограммы&apos; COLOR 3.
+  DATA: lv_program_name LIKE sy-cprog,
+        lt_source_table TYPE TABLE OF string,
+        lv_temp TYPE string.
+
+  IF iv_text EQ &apos;&apos;.
+    WRITE: / &apos;Текст не указан&apos; COLOR 6.
+    EXIT.
+  ENDIF.
+
+  CONCATENATE &apos;write: / &apos; `&apos;` iv_text `&apos;` &apos;.&apos; INTO lv_temp.
+
+  APPEND &apos;report test.&apos; TO lt_source_table.
+  APPEND &apos;form display.&apos; TO lt_source_table.
+  APPEND lv_temp TO lt_source_table.
+  APPEND &apos;endform.&apos; TO lt_source_table.
+
+  GENERATE SUBROUTINE POOL lt_source_table NAME lv_program_name.
+
+  IF sy-subrc NE 0.
+    WRITE: / &apos;ERROR in temporal_protram&apos; .
+    EXIT.
+  ENDIF.
+
+  PERFORM display IN PROGRAM (lv_program_name).
+ENDFORM.                    &quot;temporal_program
+
+
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  file_program
+*&amp;---------------------------------------------------------------------*
+*       Создание временной программы из файла
+*----------------------------------------------------------------------*
+*      --&gt;IV_FILE     Файл
+*----------------------------------------------------------------------*
+FORM file_program USING iv_file TYPE rlgrap-filename.
+  WRITE: / &apos;Тест создания программы из файла&apos; COLOR 3.
+  DATA: ev_file TYPE string,
+        lv_xfile TYPE xstring,
+        lv_line(150) TYPE c,
+        lt_table LIKE TABLE OF lv_line,
+        iv_tablesize  TYPE i,
+        lv_text_program LIKE sy-cprog.
+
+  ev_file = iv_file.
+
+  IF ev_file EQ &apos;&apos;.
+    WRITE: / &apos;Файл не указан&apos; COLOR 6.
+    EXIT.
+  ELSE.
+
+    CALL FUNCTION &apos;GUI_UPLOAD&apos;
+      EXPORTING
+        filename     = ev_file
+        filetype     = &apos;ASC&apos;
+        read_by_line = &apos;X&apos;
+      IMPORTING
+        filelength   = iv_tablesize
+      TABLES
+        data_tab     = lt_table
+      EXCEPTIONS
+        OTHERS       = 11.
+
+
+    IF sy-subrc &lt;&gt; 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*            WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+    ENDIF.
+  ENDIF.
+
+
+  GENERATE SUBROUTINE POOL lt_table NAME lv_text_program .
+
+  IF sy-subrc NE 0.
+    WRITE: / &apos;Error&apos;.
+    EXIT.
+  ENDIF.
+
+  PERFORM test IN PROGRAM (lv_text_program).
+ENDFORM.                    &quot;file_program
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  dinamic_SQL
+*&amp;---------------------------------------------------------------------*
+*       Динамический SQL
+*----------------------------------------------------------------------*
+*      --&gt;IV_TABLE      Имя таблицы
+*----------------------------------------------------------------------*
+FORM dinamic_sql USING iv_table.
+  WRITE: / &apos;Тест Dynamic SQL&apos; COLOR 3.
+  DATA: lv_count_lines TYPE i.
+
+  IF iv_table EQ &apos;&apos;.
+    WRITE: / &apos;Таблица не указана&apos; COLOR 6.
+    EXIT.
+  ENDIF.
+
+  TRY.
+      SELECT COUNT( * ) FROM (iv_table) INTO lv_count_lines .
+      DATA: lv_text TYPE string.
+      CONCATENATE &apos;Число строк таблицы&apos; iv_table &apos;-&apos; INTO lv_text SEPARATED BY space.
+      WRITE: / lv_text, lv_count_lines.
+    CATCH cx_root.
+      WRITE: / &apos;Error&apos;.
+  ENDTRY.
+
+ENDFORM.                    &quot;dinamic_SQL
+
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  test_field-symbols
+*&amp;---------------------------------------------------------------------*
+*       Тест FYELD-SYMBOLS
+*----------------------------------------------------------------------*
+*      --&gt;IV_TABLE   Имя таблицы
+*      --&gt;IV_TEXT    Произвольный текст
+*----------------------------------------------------------------------*
+FORM test_field-symbols USING iv_table iv_text TYPE string.
+  WRITE: / &apos;Тест FIELD-SYMBOLS&apos; COLOR 3.
+
+  DATA: lv_string TYPE string VALUE &apos;TEST FIELD-SYMBOLS&apos;,
+        lv_copy_to TYPE string,
+        lt_customers LIKE TABLE OF customers,
+        lr_table TYPE REF TO data.
+
+  FIELD-SYMBOLS: &lt;lfs_string1&gt; TYPE csequence,
+                 &lt;lfs_string2&gt; TYPE string,
+                 &lt;lfs_copy_from&gt; TYPE string,
+                 &lt;lfs_copy_to&gt; TYPE string,
+                 &lt;lfs_line_table&gt;,
+                 &lt;lfs_line_table_name&gt;,
+                 &lt;lfs_table&gt; TYPE STANDARD TABLE.
+
+  ASSIGN lv_string TO &lt;lfs_string1&gt;.
+  ASSIGN iv_text TO &lt;lfs_string2&gt;.
+  ASSIGN: lv_string TO &lt;lfs_copy_from&gt;,
+          lv_copy_to TO &lt;lfs_copy_to&gt;.
+
+  IF &lt;lfs_string1&gt; IS ASSIGNED.
+    SKIP.
+    WRITE: / &lt;lfs_string1&gt;.
+  ELSE.
+    WRITE: / &apos;Ссылка на переменную не присвоена!!&apos;.
+  ENDIF.
+
+  IF &lt;lfs_string2&gt; IS ASSIGNED.
+    WRITE &lt;lfs_string2&gt;.
+  ELSE.
+    WRITE: / &apos;Ссылка на переменную не присвоена!!&apos;.
+  ENDIF.
+
+  &lt;lfs_copy_to&gt; = &lt;lfs_copy_from&gt;.
+  WRITE: / &lt;lfs_copy_to&gt;.
+  lv_copy_to = &apos;Новове значение&apos;.
+  WRITE: / &lt;lfs_copy_to&gt;.
+  SKIP.
+
+  SELECT * FROM customers INTO TABLE lt_customers.
+
+  LOOP AT lt_customers ASSIGNING &lt;lfs_line_table&gt;.
+    ASSIGN COMPONENT &apos;NAME&apos; OF STRUCTURE &lt;lfs_line_table&gt; TO &lt;lfs_line_table_name&gt;.
+    &lt;lfs_line_table_name&gt; = &apos;NEW_NAME&apos;.
+    WRITE: / &lt;lfs_line_table_name&gt;.
+  ENDLOOP.
+  SKIP.
+
+  IF iv_table NE &apos;&apos;.
+    CREATE DATA lr_table TYPE STANDARD TABLE OF (iv_table).
+    ASSIGN lr_table-&gt;* TO &lt;lfs_table&gt;.
+
+    SELECT * FROM (iv_table) INTO TABLE &lt;lfs_table&gt;.
+
+    IF sy-subrc = 0.
+
+      LOOP AT &lt;lfs_table&gt; ASSIGNING &lt;lfs_line_table&gt;.
+        ASSIGN COMPONENT &apos;NAME&apos; OF STRUCTURE &lt;lfs_line_table&gt; TO &lt;lfs_line_table_name&gt;.
+
+*      &lt;lfs_line_table_name&gt; = &apos;NEW_NAME&apos;.
+        WRITE: / &lt;lfs_line_table_name&gt;.
+      ENDLOOP.
+
+    ELSE.
+      WRITE:/ &apos;ERROR ASSIGNING&apos;.
+    ENDIF.
+  ELSE.
+    WRITE: / &apos;Таблица не указана&apos; COLOR 6.
+  ENDIF.
+
+
+
+ENDFORM.                    &quot;test_field-symbols
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  rtts
+*&amp;---------------------------------------------------------------------*
+*       Тест Runtime type services (RTTS)
+*----------------------------------------------------------------------*
+FORM rtts USING iv_table.
+  WRITE: / &apos;Тест Runtime type services (RTTS)&apos; COLOR 3.
+  DATA: lo_str_descr TYPE REF TO cl_abap_structdescr,
+        lr_struct    TYPE REF TO data.
+
+
+  FIELD-SYMBOLS: &lt;lfs_spfli&gt; TYPE spfli.
+
+
+  lo_str_descr ?= cl_abap_typedescr=&gt;describe_by_name( &apos;SPFLI&apos; ). &quot; Динамическое получение структуры обьекта
+
+  &quot; Создадим объект данных относительно описания из словаря
+  CREATE DATA lr_struct TYPE HANDLE lo_str_descr.
+
+  ASSIGN lr_struct-&gt;* TO &lt;lfs_spfli&gt;.
+
+  &lt;lfs_spfli&gt;-carrid = &apos;11&apos;.
+  WRITE: / &lt;lfs_spfli&gt;-carrid.
+
+
+
+  SKIP.
+  DATA: lo_struct   TYPE REF TO cl_abap_structdescr,
+        lo_element  TYPE REF TO cl_abap_elemdescr,
+        lo_new_type TYPE REF TO cl_abap_structdescr,
+        lo_new_tab  TYPE REF TO cl_abap_tabledescr,
+        lo_data     TYPE REF TO data,
+        lt_comp     TYPE cl_abap_structdescr=&gt;component_table.
+
+  FIELD-SYMBOLS: &lt;lfs_tab&gt;   TYPE ANY TABLE,
+                 &lt;lfs_line&gt;  TYPE ANY,
+                 &lt;lfs_line_name&gt;  TYPE ANY.
+
+* Получаем описание структуры из ABAP словаря
+  lo_struct ?= cl_abap_typedescr=&gt;describe_by_name( iv_table ).
+  lt_comp  = lo_struct-&gt;get_components( ).
+
+* Создаем новый тип структуры по каталогу полей.
+  lo_new_type = cl_abap_structdescr=&gt;create( lt_comp ).
+
+* Создаем новую таблицу по структуре
+  lo_new_tab = cl_abap_tabledescr=&gt;create(
+                  p_line_type  = lo_new_type
+                  p_table_kind = cl_abap_tabledescr=&gt;tablekind_std
+                  p_unique     = abap_false ).
+
+* Создаем ссылочные переменные присываеваем значения
+  CREATE DATA lo_data TYPE HANDLE lo_new_type.
+  ASSIGN lo_data-&gt;* TO &lt;lfs_line&gt;.
+
+  CREATE DATA lo_data TYPE HANDLE lo_new_tab.
+  ASSIGN lo_data-&gt;* TO &lt;lfs_tab&gt;.
+
+  SELECT * FROM (iv_table) INTO TABLE &lt;lfs_tab&gt; UP TO 1 ROWS.
+
+
+
+  LOOP AT &lt;lfs_tab&gt; ASSIGNING &lt;lfs_line&gt;.
+    ASSIGN COMPONENT &apos;NAME&apos; OF STRUCTURE &lt;lfs_line&gt; TO &lt;lfs_line_name&gt;.
+    WRITE: / &lt;lfs_line_name&gt;.
+  ENDLOOP.
+
+
+
+ENDFORM.                    &quot;rtts</source>
+ </PROG>
+ <PROG NAME="Z88AAKT7_1" VARCL="X" SUBC="1" RMAND="601" RLOAD="R" FIXPT="X" UCCHECK="X">
+  <textPool>
+   <language SPRAS="R">
+    <textElement ID="I" KEY="001" ENTRY="Клиент" LENGTH="6 "/>
+    <textElement ID="S" KEY="P_CITY" ENTRY="        Город" LENGTH="13 "/>
+    <textElement ID="S" KEY="P_CODE" ENTRY="        Почтовый Индекс" LENGTH="23 "/>
+    <textElement ID="S" KEY="P_NAME" ENTRY="        Имя" LENGTH="11 "/>
+    <textElement ID="S" KEY="P_PHONE" ENTRY="        Телефон" LENGTH="15 "/>
+   </language>
+  </textPool>
+  <pfstatus>
+   <pfstatus_tit CODE="MAIN100" TEXT="Создание клиента в таблице customers."/>
+  </pfstatus>
+  <source>*&amp;---------------------------------------------------------------------*
+*&amp; Report  Z88AAKT7_1
+*&amp;
+*&amp;---------------------------------------------------------------------*
+*&amp;
+*&amp; Практическая работа по созданию пакетного ввода. Мамаев.
+*&amp; Создание клиента в таблице customers.
+*&amp;---------------------------------------------------------------------*
+
+REPORT  z88aakt7_1.
+
+SELECTION-SCREEN BEGIN OF BLOCK b01 WITH FRAME TITLE text-001.
+  PARAMETERS p_name(15) OBLIGATORY.
+  PARAMETERS p_code(10) TYPE n.
+  PARAMETERS p_city(15) OBLIGATORY.
+  PARAMETERS p_phone(15) OBLIGATORY.
+SELECTION-SCREEN END OF BLOCK b01.
+
+
+DATA: ls_customer LIKE customers,
+      lv_max_id LIKE customers-id,
+
+      gb TYPE REF TO ZIF_EX_Z88AAKT7_1_BADI_TEST,
+      lv_text TYPE string.
+
+START-OF-SELECTION.
+  cl_exithandler=&gt;get_instance(
+  CHANGING
+    instance    = gb
+    ).
+
+  SELECT MAX( id ) FROM customers INTO lv_max_id.
+  ADD 1 TO lv_max_id.
+
+  ls_customer-id = lv_max_id.
+  ls_customer-name = p_name.
+  ls_customer-postcode = p_code.
+  ls_customer-city = p_city.
+  ls_customer-telephone = p_phone.
+
+  MODIFY customers FROM ls_customer.
+
+  lv_text = ls_customer-name.
+  gb-&gt;write_text(
+    EXPORTING
+      iv_text = lv_text
+  ).</source>
+ </PROG>
+ <PROG NAME="Z88AAKT7_2" VARCL="X" SUBC="1" LEVL="700" RMAND="601" RLOAD="R" FIXPT="X" UCCHECK="X">
+  <textPool>
+   <language SPRAS="R">
+    <textElement ID="I" KEY="001" ENTRY="Загрузка клиентов из файла" LENGTH="132 "/>
+    <textElement ID="I" KEY="E00" ENTRY="Ошибка при открытии набора данных, КВ:" LENGTH="38 "/>
+    <textElement ID="I" KEY="I01" ENTRY="Имя сеанса" LENGTH="20 "/>
+    <textElement ID="I" KEY="I02" ENTRY="Открытие сеанса" LENGTH="30 "/>
+    <textElement ID="I" KEY="I03" ENTRY="Вставка транзакции" LENGTH="25 "/>
+    <textElement ID="I" KEY="I04" ENTRY="Закрытие сеанса" LENGTH="30 "/>
+    <textElement ID="I" KEY="I05" ENTRY="КодВозврата=" LENGTH="12 "/>
+    <textElement ID="I" KEY="I06" ENTRY="Создан ошиб. сеанс" LENGTH="25 "/>
+    <textElement ID="I" KEY="S01" ENTRY="Имя сеанса" LENGTH="25 "/>
+    <textElement ID="I" KEY="S02" ENTRY="Пользователь" LENGTH="25 "/>
+    <textElement ID="I" KEY="S03" ENTRY="Сохранить сеанс" LENGTH="25 "/>
+    <textElement ID="I" KEY="S04" ENTRY="Дата блокирования" LENGTH="25 "/>
+    <textElement ID="I" KEY="S05" ENTRY="Режим выполнения" LENGTH="25 "/>
+    <textElement ID="I" KEY="S06" ENTRY="Режим обновления" LENGTH="25 "/>
+    <textElement ID="I" KEY="S07" ENTRY="Создать сеанс" LENGTH="25 "/>
+    <textElement ID="I" KEY="S08" ENTRY="Call Transaction" LENGTH="25 "/>
+    <textElement ID="I" KEY="S09" ENTRY="ОшибСеанс" LENGTH="11 "/>
+    <textElement ID="I" KEY="S10" ENTRY="ИндОтсутствияДанн" LENGTH="18 "/>
+    <textElement ID="I" KEY="S11" ENTRY="КратЖурнал" LENGTH="13 "/>
+    <textElement ID="R" ENTRY="Практическая работа по созданию пакетного ввода. Мамаев. Пакетный ввод" LENGTH="70 "/>
+    <textElement ID="S" KEY="P_FILE" ENTRY="        Файл" LENGTH="12 "/>
+   </language>
+  </textPool>
+  <source>REPORT z88aakt7_2.
+
+SELECTION-SCREEN BEGIN OF BLOCK b01 WITH FRAME TITLE text-001.
+PARAMETERS: p_file TYPE rlgrap-filename.
+SELECTION-SCREEN END OF BLOCK b01.
+
+DATA: BEGIN OF gs_record,
+        p_name_001(015),
+        p_city_002(015),
+        p_phone_003(015),
+      END OF gs_record.
+
+DATA: ev_file TYPE string,
+      lv_string TYPE string,
+      gt_string TYPE STANDARD TABLE OF string,
+      gt_record LIKE TABLE OF gs_record,
+
+      gt_bdcdata TYPE STANDARD TABLE OF bdcdata,
+      gs_bdcdata TYPE bdcdata.
+
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR p_file.
+  CALL FUNCTION &apos;F4_FILENAME&apos; &quot; Диалоговое окно выбора файла
+    EXPORTING
+      field_name = &apos;P_FILE&apos;
+    IMPORTING
+      file_name  = p_file.
+
+START-OF-SELECTION.
+
+  ev_file = p_file.
+
+  CALL FUNCTION &apos;GUI_UPLOAD&apos; &quot; Загрузка содержимого файла
+    EXPORTING
+      filename     = ev_file
+      filetype     = &apos;ASC&apos;
+      read_by_line = &apos;X&apos;
+    TABLES
+      data_tab     = gt_string
+    EXCEPTIONS
+      OTHERS       = 11.
+
+  LOOP AT gt_string INTO lv_string. &quot; Разделение строки на значения.
+    SPLIT lv_string AT &apos;;&apos; INTO: gs_record-p_name_001
+                                 gs_record-p_city_002
+                                 gs_record-p_phone_003.
+    APPEND gs_record TO gt_record.
+  ENDLOOP.
+
+
+
+  LOOP AT gt_record INTO gs_record. &quot; Множественный вызов программы Z88AAKT7_1 с данными из файла.
+
+    REFRESH gt_bdcdata.
+
+    PERFORM bdc_dynpro      USING &apos;Z88AAKT7_1&apos; &apos;1000&apos;.
+    PERFORM bdc_field       USING &apos;BDC_CURSOR&apos;
+                                  &apos;P_PHONE&apos;.
+    PERFORM bdc_field       USING &apos;BDC_OKCODE&apos;
+                                  &apos;=ONLI&apos;.
+    PERFORM bdc_field       USING &apos;P_NAME&apos;
+                                  gs_record-p_name_001.
+    PERFORM bdc_field       USING &apos;P_CITY&apos;
+                                  gs_record-p_city_002.
+    PERFORM bdc_field       USING &apos;P_PHONE&apos;
+                                  gs_record-p_phone_003.
+
+    CALL TRANSACTION &apos;Z88_TEST_Z88AAKT7_1&apos; USING gt_bdcdata MODE &apos;N&apos; UPDATE &apos;A&apos;.
+  ENDLOOP.
+
+  IF sy-subrc EQ 0.
+    MESSAGE &apos;Данные успешно загружены&apos; TYPE &apos;S&apos;.
+  ELSE.
+    MESSAGE &apos;Ошибка&apos; TYPE &apos;E&apos;.
+  ENDIF.
+
+
+*----------------------------------------------------------------------*
+*        Start new screen                                              *
+*----------------------------------------------------------------------*
+FORM bdc_dynpro USING program dynpro.
+  CLEAR gs_bdcdata.
+  gs_bdcdata-program  = program.
+  gs_bdcdata-dynpro   = dynpro.
+  gs_bdcdata-dynbegin = &apos;X&apos;.
+  APPEND gs_bdcdata TO gt_bdcdata.
+ENDFORM.                    &quot;BDC_DYNPRO
+
+*----------------------------------------------------------------------*
+*        Insert field                                                  *
+*----------------------------------------------------------------------*
+FORM bdc_field USING fnam fval.
+  IF fval &lt;&gt; space.
+    CLEAR gs_bdcdata.
+    gs_bdcdata-fnam = fnam.
+    gs_bdcdata-fval = fval.
+    APPEND gs_bdcdata TO gt_bdcdata.
+  ENDIF.
+ENDFORM.                    &quot;BDC_FIELD</source>
+ </PROG>
+</nugget>
