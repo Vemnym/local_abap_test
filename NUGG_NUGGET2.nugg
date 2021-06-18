@@ -1,0 +1,930 @@
+<?xml version="1.0" encoding="utf-8"?>
+<nugget name="NUGGET2">
+ <DOMA DOMNAME="Z88D_GRBPM" MultiLanguageSupport="X">
+  <DDLANGUAGE LANGU="R">
+   <DD01V DOMNAME="Z88D_GRBPM" DDLANGUAGE="R" DATATYPE="CHAR" LENG="000002" OUTPUTLEN="000002" DECIMALS="000000" MASKLEN="0000" DDTEXT="Группы бизнес процессов для статистики" AUTHCLASS="00"/>
+  </DDLANGUAGE>
+ </DOMA>
+ <DTEL ROLLNAME="Z88E_GRBPM" DDLANGUAGE="R" DOMNAME="Z88D_GRBPM" ROUTPUTLEN="000000" HEADLEN="38" SCRLEN1="10" SCRLEN2="20" SCRLEN3="38" DDTEXT="Группы бизнес процессов для статистики" REPTEXT="Группы бизнес процессов для статистики" SCRTEXT_S="Группы биз" SCRTEXT_M="Группы бизнес процес" SCRTEXT_L="Группы бизнес процессов для статистики" AUTHCLASS="00" DTELMASTER="R" DATATYPE="CHAR" LENG="000002" DECIMALS="000000" OUTPUTLEN="000002" REFKIND="D" MultiLanguageSupport="X">
+  <tpara/>
+  <DDLANGUAGE LANGU="R">
+   <DD04V ROLLNAME="Z88E_GRBPM" DDLANGUAGE="R" DOMNAME="Z88D_GRBPM" ROUTPUTLEN="000000" HEADLEN="38" SCRLEN1="10" SCRLEN2="20" SCRLEN3="38" DDTEXT="Группы бизнес процессов для статистики" REPTEXT="Группы бизнес процессов для статистики" SCRTEXT_S="Группы биз" SCRTEXT_M="Группы бизнес процес" SCRTEXT_L="Группы бизнес процессов для статистики" AUTHCLASS="00" DTELMASTER="R" DATATYPE="CHAR" LENG="000002" DECIMALS="000000" OUTPUTLEN="000002" REFKIND="D"/>
+  </DDLANGUAGE>
+ </DTEL>
+ <DTEL ROLLNAME="Z88E_COUNT_PROCES" DDLANGUAGE="R" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" AUTHCLASS="00" DTELMASTER="R" DATATYPE="INT4" LENG="000010" DECIMALS="000000" OUTPUTLEN="000010" SIGNFLAG="X" REFKIND="D" MultiLanguageSupport="X">
+  <tpara/>
+  <DDLANGUAGE LANGU="R">
+   <DD04V ROLLNAME="Z88E_COUNT_PROCES" DDLANGUAGE="R" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" AUTHCLASS="00" DTELMASTER="R" DATATYPE="INT4" LENG="000010" DECIMALS="000000" OUTPUTLEN="000010" SIGNFLAG="X" REFKIND="D"/>
+  </DDLANGUAGE>
+ </DTEL>
+ <FUGR AREA="Z88_EDO_STAT" SPRAS="R" AREAT="Статистика бизнес процессов">
+  <functionGroupDocumentation/>
+  <mainprogram NAME="SAPLZ88_EDO_STAT" VARCL="X" DBAPL="S" DBNA="D$" SUBC="F" APPL="S" RMAND="601" RLOAD="R" FIXPT="X" LDBNAME="D$S" UCCHECK="X">
+   <textPool/>
+   <source>*******************************************************************
+*   System-defined Include-files.                                 *
+*******************************************************************
+  INCLUDE LZ88_EDO_STATTOP.                  &quot; Global Data
+  INCLUDE LZ88_EDO_STATUXX.                  &quot; Function Modules
+
+*******************************************************************
+*   User-defined Include-files (if necessary).                    *
+*******************************************************************
+* INCLUDE LZ88_EDO_STATF...                  &quot; Subprograms
+* INCLUDE LZ88_EDO_STATO...                  &quot; PBO-Modules
+* INCLUDE LZ88_EDO_STATI...                  &quot; PAI-Modules
+
+INCLUDE Z88_EDO_STAT01.</source>
+  </mainprogram>
+  <includeprograms>
+   <include NAME="LZ88_EDO_STATTOP" DBAPL="S" DBNA="D$" SUBC="I" APPL="S" RMAND="601" FIXPT="X" LDBNAME="D$S" UCCHECK="X">
+    <include_source>FUNCTION-POOL Z88_EDO_STAT.                 &quot;MESSAGE-ID ..</include_source>
+   </include>
+   <include NAME="Z88_EDO_STAT01" VARCL="X" SUBC="I" APPL="S" RMAND="601" RLOAD="R" UCCHECK="X">
+    <include_source>*&amp;---------------------------------------------------------------------*
+*&amp;  Include           Z88_EDO_STAT01
+*&amp;---------------------------------------------------------------------*
+FORM GET_SDO_RFC_DESTINATION  changing pf_sdo_rfc type rfcdest.
+   pf_sdo_rfc = &apos;ECS_SDO&apos;.
+ENDFORM.                    &quot; GET_SDO_RFC_DESTINATION
+
+form TEST_RFC_CONNECTION  using    pf_sdo_rfc type rfcdest
+                          changing pf_connection_ok type flag.
+
+  data: lf_connection_ok type flag.
+
+  clear: lf_connection_ok.
+  do 5 times.
+    call function &apos;RFC_PING&apos; destination pf_sdo_rfc
+      exceptions
+        system_failure        = 1
+        communication_failure = 2.
+    if sy-subrc = 0.
+      pf_connection_ok = &apos;X&apos;.
+      exit.
+    endif.
+  enddo.
+
+endform.</include_source>
+   </include>
+  </includeprograms>
+  <functionmodules>
+   <functionmodule NAME="Z88_GET_EDO_STAT_RFC" STEXT="RFC Вызов статистических данных бизнес процессов">
+    <importing PARAMETER="FIRST_DATE" OPTIONAL="X" TYP="D"/>
+    <importing PARAMETER="LAST_DATE" OPTIONAL="X" TYP="D"/>
+    <importing PARAMETER="GRUP_BPM" OPTIONAL="X" TYP="Z88E_GRBPM"/>
+    <importing PARAMETER="GRUP1" OPTIONAL="X" TYP="HPRNR"/>
+    <importing PARAMETER="GRUP2" OPTIONAL="X" TYP="HPRNR"/>
+    <importing PARAMETER="GRUP3" OPTIONAL="X" TYP="HPRNR"/>
+    <importing PARAMETER="GRUP4" OPTIONAL="X" TYP="HPRNR"/>
+    <importing PARAMETER="GRUP5" OPTIONAL="X" TYP="HPRNR"/>
+    <exporting PARAMETER="T_STAT" TYP="Z88T_EDO_STAT_BPM"/>
+    <exceptions EXCEPTION="TREB_ABSENT"/>
+    <exceptions EXCEPTION="RFC_ERROR"/>
+    <documentation PARAMETER="FIRST_DATE" KIND="P" INDEX=" 001"/>
+    <documentation PARAMETER="LAST_DATE" KIND="P" INDEX=" 002"/>
+    <documentation PARAMETER="GRUP_BPM" KIND="P" STEXT="Группы бизнес процессов для статистики" INDEX=" 003"/>
+    <documentation PARAMETER="GRUP1" KIND="P" STEXT="Группа бизнес-процессов" INDEX=" 004"/>
+    <documentation PARAMETER="GRUP2" KIND="P" STEXT="Группа бизнес-процессов" INDEX=" 005"/>
+    <documentation PARAMETER="GRUP3" KIND="P" STEXT="Группа бизнес-процессов" INDEX=" 006"/>
+    <documentation PARAMETER="GRUP4" KIND="P" STEXT="Группа бизнес-процессов" INDEX=" 007"/>
+    <documentation PARAMETER="GRUP5" KIND="P" STEXT="Группа бизнес-процессов" INDEX=" 008"/>
+    <documentation PARAMETER="T_STAT" KIND="P" STEXT="Таблица статистики бизнес процессов" INDEX=" 009"/>
+    <documentation PARAMETER="TREB_ABSENT" KIND="X" INDEX=" 010"/>
+    <documentation PARAMETER="RFC_ERROR" KIND="X" INDEX=" 011"/>
+    <fm_source>DATA: lf_sdo_rfc TYPE rfcdest.
+  DATA: lf_connection_ok  TYPE c LENGTH 1.
+
+  PERFORM get_sdo_rfc_destination CHANGING lf_sdo_rfc.
+  PERFORM test_rfc_connection USING lf_sdo_rfc
+                              CHANGING lf_connection_ok.
+  IF lf_connection_ok  &lt;&gt; &apos;X&apos;.
+    RAISE rfc_error.
+  ENDIF.
+
+  CALL FUNCTION &apos;Z88_GET_EDO_STAT_RFC&apos; DESTINATION lf_sdo_rfc
+    EXPORTING
+      first_date = first_date
+      last_date  = last_date
+      GRUP_BPM = GRUP_BPM
+      GRUP1	= GRUP1
+      GRUP2	= GRUP2
+      GRUP3	= GRUP3
+      GRUP4	= GRUP4
+      GRUP5	= GRUP5
+    IMPORTING
+       t_stat                = t_stat
+    EXCEPTIONS
+      treb_absent           = 1
+      system_failure        = 2
+      communication_failure = 3.
+
+  CASE sy-subrc.
+    WHEN 0.
+
+    WHEN 1.
+      RAISE treb_absent.
+
+    WHEN 2 OR 3.
+      RAISE rfc_error.
+
+    WHEN OTHERS.
+      RAISE rfc_error.
+
+  ENDCASE.</fm_source>
+    <functionModuleDocumentation/>
+   </functionmodule>
+   <functionmodule NAME="Z88_DO_EDO_STAT_RFC" STEXT="Выполинть расчет статистики бизнес процессов">
+    <importing PARAMETER="FIRST_DATE" REFERENCE="X" TYP="D"/>
+    <importing PARAMETER="LAST_DATE" REFERENCE="X" TYP="D"/>
+    <documentation PARAMETER="FIRST_DATE" KIND="P" INDEX=" 001"/>
+    <documentation PARAMETER="LAST_DATE" KIND="P" INDEX=" 002"/>
+    <fm_source>DATA: lf_sdo_rfc TYPE rfcdest.
+  DATA: lf_connection_ok  TYPE c LENGTH 1.
+
+  PERFORM get_sdo_rfc_destination CHANGING lf_sdo_rfc.
+  PERFORM test_rfc_connection USING lf_sdo_rfc
+                              CHANGING lf_connection_ok.
+  IF lf_connection_ok  &lt;&gt; &apos;X&apos;.
+    RAISE rfc_error.
+  ENDIF.
+
+CALL FUNCTION &apos;Z88_DO_EDO_STAT_RFC&apos; DESTINATION lf_sdo_rfc
+    EXPORTING
+      first_date = first_date
+      last_date  = last_date
+    EXCEPTIONS
+      treb_absent           = 1
+      system_failure        = 2
+      communication_failure = 3.
+
+  CASE sy-subrc.
+    WHEN 0.
+
+    WHEN 1.
+      RAISE treb_absent.
+
+    WHEN 2 OR 3.
+      RAISE rfc_error.
+
+    WHEN OTHERS.
+      RAISE rfc_error.
+
+  ENDCASE.</fm_source>
+    <functionModuleDocumentation/>
+   </functionmodule>
+  </functionmodules>
+ </FUGR>
+ <PROG NAME="Z88_EDO_STAT_BPM" VARCL="X" SUBC="1" RMAND="601" RLOAD="R" FIXPT="X" UCCHECK="X">
+  <textPool>
+   <language SPRAS="R">
+    <textElement ID="I" KEY="001" ENTRY="Статистика бизнес процессов" LENGTH="27 "/>
+    <textElement ID="I" KEY="002" ENTRY="Группы бизнес процессов" LENGTH="23 "/>
+    <textElement ID="R" ENTRY="Прогр. Z88_EDO_STAT_BPM" LENGTH="23 "/>
+    <textElement ID="S" KEY="P_GRUP" ENTRY="        Группа бизнес процессов" LENGTH="31 "/>
+    <textElement ID="S" KEY="P_GRUP1" ENTRY="        ЮЗЭДО" LENGTH="13 "/>
+    <textElement ID="S" KEY="P_GRUP2" ENTRY="        Типовые" LENGTH="15 "/>
+    <textElement ID="S" KEY="P_GRUP3" ENTRY="        СПС + ВРК" LENGTH="17 "/>
+    <textElement ID="S" KEY="P_GRUP4" ENTRY="        ЭДО СПС" LENGTH="15 "/>
+    <textElement ID="S" KEY="P_GRUP5" ENTRY="        ЭДО ВРК" LENGTH="15 "/>
+    <textElement ID="S" KEY="S_PERIOD" ENTRY="        Период" LENGTH="14 "/>
+   </language>
+  </textPool>
+  <dynpros>
+   <dynpro PROG="Z88_EDO_STAT_BPM" DNUM="0100" FNUM="0100" BZMX="27 " BZBR="119 " MILI="192 " MICO="37 " MALI="0 " MACO="0 " NOLI="27 " NOCO="120 " VALP="0 " CUAN="G" SPRA="R" DTEXT="Главный экран">
+    <dynprofield FNAM="TABLE1" DIDX="001B" FLG1="00" FLG2="00" FLG3="00" FILL="U" FMB1="30" FMB2="00" LENG="77" LINE="01" COLN="02" LANF="00" LBLK="00" LREP="00" AUTH="101" AGLT="01" ADEZ="01"/>
+    <dynprofield FNAM="OK_CODE" DIDX="0000" FLG1="80" FLG2="10" FLG3="00" FMB1="00" FMB2="00" LENG="14" LINE="FF" COLN="01" LTYP="O" LANF="00" LBLK="00" LREP="00" TYPE="CHAR" AGLT="00" ADEZ="00" STXT="____________________"/>
+    <dynproflowsource>PROCESS BEFORE OUTPUT.
+* MODULE STATUS_0100.
+MODULE PBO.
+*
+PROCESS AFTER INPUT.
+* MODULE USER_COMMAND_0100.
+ MODULE PAI.</dynproflowsource>
+   </dynpro>
+  </dynpros>
+  <pfstatus>
+   <pfstatus_sta CODE="MAIN100" MODAL="D" ACTCODE="000001" PFKCODE="000001" BUTCODE="0001" INT_NOTE="Статистика бизнес процессов"/>
+   <pfstatus_fun CODE="EXCEL" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_XLS" ICON_ID="@J2@" FUN_TEXT="EXCEL" ICON_TEXT="EXCEL" INFO_TEXT="Сохранение в Excel"/>
+   <pfstatus_fun CODE="EXIT" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Назад"/>
+   <pfstatus_fun CODE="EXIT" TEXTNO="002" TEXT_TYPE="S" FUN_TEXT="Выход"/>
+   <pfstatus_fun CODE="EXIT" TEXTNO="003" TEXT_TYPE="S" TEXT_NAME="ICON_CANCEL" ICON_ID="@0W@" FUN_TEXT="Отменить"/>
+   <pfstatus_fun CODE="UPDATE" TEXTNO="001" TEXT_TYPE="S" TEXT_NAME="ICON_REFRESH" ICON_ID="@42@" FUN_TEXT="Выполнить новый расчет" ICON_TEXT="Обновить"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="01" PFNO="13"/>
+   <pfstatus_but PFK_CODE="000001" CODE="0001" NO="02" PFNO="02"/>
+   <pfstatus_pfk CODE="000001" PFNO="02" FUNCODE="UPDATE" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="03" FUNCODE="EXIT" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="12" FUNCODE="EXIT" FUNNO="003"/>
+   <pfstatus_pfk CODE="000001" PFNO="13" FUNCODE="EXCEL" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="15" FUNCODE="EXIT" FUNNO="002"/>
+   <pfstatus_set STATUS="MAIN100" FUNCTION="EXCEL"/>
+   <pfstatus_set STATUS="MAIN100" FUNCTION="EXIT"/>
+   <pfstatus_set STATUS="MAIN100" FUNCTION="UPDATE"/>
+   <pfstatus_doc OBJ_TYPE="A" OBJ_CODE="000001" MODAL="D"/>
+   <pfstatus_doc OBJ_TYPE="P" OBJ_CODE="000001" MODAL="D"/>
+   <pfstatus_doc OBJ_TYPE="B" OBJ_CODE="000001" SUB_CODE="0001" MODAL="D"/>
+   <pfstatus_tit CODE="MAIN100" TEXT="Статистика бизнес процессов"/>
+  </pfstatus>
+  <source>*&amp;---------------------------------------------------------------------*
+*&amp; Report  Z88_EDO_STAT_BPM
+*&amp;
+*&amp;---------------------------------------------------------------------*
+*&amp;
+*&amp;
+*&amp;---------------------------------------------------------------------*
+
+REPORT  z88_edo_stat_bpm.
+
+TYPE-POOLS : vrm.
+
+CONSTANTS: gv_grup_name1(5) VALUE &apos;ЮЗЭДО&apos;,
+           gv_grup_name2(7) VALUE &apos;Типовые&apos;,
+           gv_grup_name3(9) VALUE &apos;СПС + ВРК&apos;,
+           gv_grup_name4(7) VALUE &apos;ЭДО СПС&apos;,
+           gv_grup_name5(7) VALUE &apos;ЭДО ВРК&apos;.
+
+FIELD-SYMBOLS: &lt;gv_grup_name&gt;.
+
+DATA: lt_table TYPE z88t_edo_stat_bpm,
+      ls_table LIKE LINE OF lt_table,
+
+      BEGIN OF gs_output_table,
+        year(4) ,
+        date TYPE string,
+        grup1 LIKE ls_table-count_proces,
+        grup2 LIKE ls_table-count_proces,
+        grup3 LIKE ls_table-count_proces,
+        grup4 LIKE ls_table-count_proces,
+        grup5 LIKE ls_table-count_proces,
+      END OF gs_output_table,
+
+      gt_output_table LIKE TABLE OF gs_output_table,
+
+      lt_grup TYPE vrm_values,
+      ls_grup LIKE LINE OF lt_grup,
+
+      lv_ny LIKE isellist-month,
+      gv_first_date TYPE d,
+      gv_last_date TYPE d,
+
+      ok_code LIKE sy-ucomm,
+      go_grid1  TYPE REF TO cl_gui_alv_grid,
+
+      gv_grup_name(13).
+
+DATA: l_code  LIKE  sy-subrc.
+
+
+*----------------------------------------------------------------------*
+*       CLASS gcl_event_receiver DEFINITION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS gcl_event_receiver DEFINITION.
+
+  PUBLIC SECTION.
+
+    METHODS:
+
+    handle_before_user_command FOR EVENT before_user_command OF cl_gui_alv_grid
+
+    IMPORTING e_ucomm.
+
+ENDCLASS. &quot;lcl_event_receiver DEFINITION
+
+*----------------------------------------------------------------------*
+*       CLASS gcl_event_receiver IMPLEMENTATION
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+CLASS gcl_event_receiver IMPLEMENTATION.
+
+  METHOD handle_before_user_command.
+
+    PERFORM f_handle_before_user_command USING e_ucomm.
+
+  ENDMETHOD.                    &quot;handle_before_user_command
+
+ENDCLASS.                    &quot;gcl_event_receiver IMPLEMENTATION
+
+DATA: go_handler TYPE REF TO gcl_event_receiver.
+
+
+SELECTION-SCREEN BEGIN OF BLOCK b01 WITH FRAME TITLE text-001.
+SELECT-OPTIONS s_period FOR lv_ny NO-EXTENSION.
+SELECTION-SCREEN BEGIN OF BLOCK b02 WITH FRAME TITLE text-002.
+PARAMETERS p_grup1 AS CHECKBOX DEFAULT &apos;X&apos;.
+PARAMETERS p_grup2 AS CHECKBOX DEFAULT &apos;X&apos;.
+PARAMETERS p_grup3 AS CHECKBOX DEFAULT &apos;X&apos;.
+PARAMETERS p_grup4 AS CHECKBOX DEFAULT &apos;X&apos;.
+PARAMETERS p_grup5 AS CHECKBOX DEFAULT &apos;X&apos;.
+SELECTION-SCREEN END OF BLOCK b02.
+SELECTION-SCREEN END OF BLOCK b01.
+
+INITIALIZATION .
+
+  lv_ny = sy-datum+0(6).
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR s_period-low.
+  CALL FUNCTION &apos;POPUP_TO_SELECT_MONTH&apos;
+    EXPORTING
+     actual_month                     = lv_ny
+     language                         = sy-langu
+     start_column                     = 8
+     start_row                        = 5
+   IMPORTING
+     selected_month                   = s_period-low
+     return_code                      = l_code
+            .
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR s_period-high.
+  CALL FUNCTION &apos;POPUP_TO_SELECT_MONTH&apos;
+    EXPORTING
+      actual_month   = lv_ny
+      language       = sy-langu
+      start_column   = 8
+      start_row      = 5
+    IMPORTING
+      selected_month = s_period-high
+      return_code    = l_code.
+
+
+START-OF-SELECTION.
+
+  CREATE OBJECT go_handler.
+
+  gv_first_date = s_period-low.
+  CONCATENATE gv_first_date &apos;01&apos; INTO gv_first_date.
+
+  IF s_period-high IS NOT INITIAL.
+    gv_last_date = s_period-high.
+    CONCATENATE gv_last_date &apos;01&apos; INTO gv_last_date.
+  ENDIF.
+
+  PERFORM generate_data_alv TABLES lt_table CHANGING lt_table.
+
+
+  CALL SCREEN 100.
+
+*----------------------------------------------------------------------*
+*  MODULE pbo OUTPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE pbo OUTPUT.
+
+  DATA:ls_layout TYPE disvariant,
+       ls_layout_lvc TYPE lvc_s_layo,
+       lt_sort TYPE lvc_t_sort,
+       ls_sort TYPE lvc_s_sort,
+       lv_repid LIKE sy-repid,
+
+       lt_fieldcat TYPE lvc_t_fcat,
+       ls_fieldcat TYPE lvc_s_fcat.
+
+  CLEAR ls_layout.
+  lv_repid = sy-repid.
+  ls_layout-report = lv_repid.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;YEAR&apos;.
+  ls_fieldcat-reptext = &apos;Год&apos;.
+  ls_fieldcat-emphasize = &apos;X&apos;.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;DATE&apos;.
+  ls_fieldcat-reptext = &apos;Месяц&apos;.
+  ls_fieldcat-emphasize = &apos;X&apos;.
+
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;GRUP1&apos;.
+  ls_fieldcat-reptext = gv_grup_name1.
+  ls_fieldcat-do_sum  = &apos;X&apos;.
+  IF p_grup1 EQ &apos;&apos;.
+    ls_fieldcat-no_out = &apos;X&apos;.
+  ENDIF.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;GRUP2&apos;.
+  ls_fieldcat-reptext = gv_grup_name2.
+  ls_fieldcat-do_sum  = &apos;X&apos;.
+  IF p_grup2 EQ &apos;&apos;.
+    ls_fieldcat-no_out = &apos;X&apos;.
+  ENDIF.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;GRUP3&apos;.
+  ls_fieldcat-reptext = gv_grup_name3.
+  ls_fieldcat-do_sum  = &apos;X&apos;.
+  IF p_grup3 EQ &apos;&apos;.
+    ls_fieldcat-no_out = &apos;X&apos;.
+  ENDIF.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;GRUP4&apos;.
+  ls_fieldcat-reptext = gv_grup_name4.
+  ls_fieldcat-do_sum  = &apos;X&apos;.
+  IF p_grup4 EQ &apos;&apos;.
+    ls_fieldcat-no_out = &apos;X&apos;.
+  ENDIF.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;GRUP5&apos;.
+  ls_fieldcat-reptext = gv_grup_name5.
+  ls_fieldcat-do_sum  = &apos;X&apos;.
+  IF p_grup5 EQ &apos;&apos;.
+    ls_fieldcat-no_out = &apos;X&apos;.
+  ENDIF.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  ls_sort-fieldname = &apos;YEAR&apos;.
+  ls_sort-subtot = &apos;X&apos;.
+  APPEND ls_sort TO lt_sort.
+
+*  ls_layout_lvc-no_rowmark = &apos;X&apos;.
+*  ls_layout_lvc-sel_mode = &apos;D&apos;.
+
+
+
+  SET PF-STATUS &apos;MAIN100&apos;.
+  SET TITLEBAR &apos;MAIN100&apos;.
+  CREATE OBJECT go_grid1
+    EXPORTING
+      i_parent = cl_gui_custom_container=&gt;screen0.
+
+  SET HANDLER go_handler-&gt;handle_before_user_command FOR go_grid1.
+
+  CALL METHOD go_grid1-&gt;set_table_for_first_display
+    EXPORTING
+      i_structure_name = &apos;GRUP_BPM&apos;(001)
+      is_variant       = ls_layout
+      is_layout        = ls_layout_lvc
+    CHANGING
+      it_fieldcatalog  = lt_fieldcat
+      it_sort          = lt_sort
+      it_outtab        = gt_output_table.
+
+
+
+
+ENDMODULE.                    &quot;pbo OUTPUT
+
+*----------------------------------------------------------------------*
+*  MODULE pai INPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE pai INPUT.
+  CASE ok_code.
+    WHEN &apos;EXIT&apos;.
+      PERFORM exit_program.
+    WHEN &apos;EXCEL&apos;.
+      PERFORM save_to_excel.
+    WHEN &apos;UPDATE&apos;.
+      PERFORM update_data.
+      CALL METHOD go_grid1-&gt;refresh_table_display.
+  ENDCASE.
+  CLEAR ok_code.
+ENDMODULE.                    &quot;pai INPUT
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  exit_program
+*&amp;---------------------------------------------------------------------*
+*       Выйти из программы
+*----------------------------------------------------------------------*
+FORM exit_program.
+*****  CALL METHOD custom_container-&gt;free.
+  LEAVE TO SCREEN 0.
+ENDFORM.                    &quot;exit_program
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  get_rfc_table
+*&amp;---------------------------------------------------------------------*
+*       Получить удаленные данные статистики бизнес процессов
+*----------------------------------------------------------------------*
+*      --&gt;IV_FIRST_DATE  Начало диапозона
+*      --&gt;IV_LAST_DATE   Конец диапозона
+*      --&gt;P_GRUP         Номер группы бизнес процессов
+*      --&gt;IT_TABLE       Данные статистики бизнес процессов
+*----------------------------------------------------------------------*
+FORM get_rfc_table USING iv_first_date iv_last_date CHANGING it_table .
+  CLEAR it_table.
+  CALL FUNCTION &apos;Z88_GET_EDO_STAT_RFC&apos;
+    EXPORTING
+      first_date = iv_first_date
+      last_date  = iv_last_date
+      grup1      = p_grup1
+      grup2      = p_grup2
+      grup3      = p_grup3
+      grup4      = p_grup4
+      grup5      = p_grup5
+    IMPORTING
+      t_stat     = it_table.
+
+ENDFORM.                    &quot;get_table
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  create_output_table
+*&amp;---------------------------------------------------------------------*
+*      Создать таблицу для ALV
+*----------------------------------------------------------------------*
+*      --&gt;IT_TABLE         Данные статистики бизнес процессов
+*      --&gt;IS_OUTPUT_TABLE  Структура таблицы статистики бизнес процессов для ALV
+*      --&gt;IT_OUTPUT_TABLE  Таблица статистики бизнес процессов для ALV
+*----------------------------------------------------------------------*
+FORM create_output_table TABLES it_table it_output_table.
+
+  LOOP AT it_table INTO ls_table.
+    CLEAR gs_output_table.
+    gs_output_table-year = ls_table-period(4).
+    CASE ls_table-period+4(2).
+      WHEN &apos;01&apos;.
+        gs_output_table-date = &apos;Январь&apos;.
+      WHEN &apos;02&apos;.
+        gs_output_table-date = &apos;Февраль&apos;.
+      WHEN &apos;03&apos;.
+        gs_output_table-date = &apos;Март&apos;.
+      WHEN &apos;04&apos;.
+        gs_output_table-date = &apos;Апрель&apos;.
+      WHEN &apos;05&apos;.
+        gs_output_table-date = &apos;Май&apos;.
+      WHEN &apos;06&apos;.
+        gs_output_table-date = &apos;Июнь&apos;.
+      WHEN &apos;07&apos;.
+        gs_output_table-date = &apos;Июль&apos;.
+      WHEN &apos;08&apos;.
+        gs_output_table-date = &apos;Август&apos;.
+      WHEN &apos;09&apos;.
+        gs_output_table-date = &apos;Сентябрь&apos;.
+      WHEN &apos;10&apos;.
+        gs_output_table-date = &apos;Октябрь&apos;.
+      WHEN &apos;11&apos;.
+        gs_output_table-date = &apos;Ноябрь&apos;.
+      WHEN &apos;12&apos;.
+        gs_output_table-date = &apos;Декабрь&apos;.
+    ENDCASE.
+
+    CASE ls_table-grup_bpm.
+      WHEN &apos;01&apos;.
+        gs_output_table-grup1 = ls_table-count_proces.
+      WHEN &apos;02&apos;.
+        gs_output_table-grup2 = ls_table-count_proces.
+      WHEN &apos;03&apos;.
+        gs_output_table-grup3 = ls_table-count_proces.
+      WHEN &apos;04&apos;.
+        gs_output_table-grup4 = ls_table-count_proces.
+      WHEN &apos;05&apos;.
+        gs_output_table-grup5 = ls_table-count_proces.
+    ENDCASE.
+
+    COLLECT gs_output_table INTO it_output_table.
+  ENDLOOP.
+
+ENDFORM.                    &quot;create_output_table
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  SAVE_TO_EXCEL
+*&amp;---------------------------------------------------------------------*
+*       Сохранить в Excel
+*----------------------------------------------------------------------*
+FORM save_to_excel.
+
+  DATA: lt_grups TYPE z88t_edo_stat_grups_bpm,
+        ls_grups LIKE LINE OF lt_grups,
+        lt_stat_grup TYPE z88t_edo_stat_grup_bpm,
+        ls_stat_grup LIKE LINE OF lt_stat_grup,
+        lv_grup(2) TYPE c,
+        lv_variable_grup(21) TYPE c.
+
+  DATA  lv_excel_bin TYPE xstring.
+
+  FIELD-SYMBOLS: &lt;lv_variable_grup&gt;.
+
+
+  lv_grup = 1.
+  DO 5 TIMES.
+
+    CLEAR ls_grups.
+    CLEAR lv_variable_grup.
+    CLEAR lt_stat_grup.
+
+    CONCATENATE &apos;gs_output_table-grup&apos; lv_grup INTO lv_variable_grup.
+    ASSIGN (lv_variable_grup) TO &lt;lv_variable_grup&gt;.
+    CONCATENATE &apos;0&apos; lv_grup INTO lv_grup.
+
+    IF p_grup1 EQ &apos;&apos; AND lv_grup EQ &apos;01&apos;.
+      lv_grup = lv_grup + 1.
+      CONTINUE.
+    ENDIF.
+    IF p_grup2 EQ &apos;&apos; AND lv_grup EQ &apos;02&apos;.
+      lv_grup = lv_grup + 1.
+      CONTINUE.
+    ENDIF.
+    IF p_grup3 EQ &apos;&apos; AND lv_grup EQ &apos;03&apos;.
+      lv_grup = lv_grup + 1.
+      CONTINUE.
+    ENDIF.
+    IF p_grup4 EQ &apos;&apos; AND lv_grup EQ &apos;04&apos;.
+      lv_grup = lv_grup + 1.
+      CONTINUE.
+    ENDIF.
+    IF p_grup5 EQ &apos;&apos; AND lv_grup EQ &apos;05&apos;.
+      lv_grup = lv_grup + 1.
+      CONTINUE.
+    ENDIF.
+
+    ls_grups-grup_bpm = lv_grup.
+    LOOP AT gt_output_table INTO gs_output_table.
+      CLEAR ls_stat_grup.
+      ls_stat_grup-year = gs_output_table-year.
+      CASE gs_output_table-date.
+        WHEN &apos;Январь&apos;.
+          ls_stat_grup-january = &lt;lv_variable_grup&gt;.
+        WHEN &apos;Февраль&apos;.
+          ls_stat_grup-february = &lt;lv_variable_grup&gt;.
+        WHEN &apos;Март&apos;.
+          ls_stat_grup-march = &lt;lv_variable_grup&gt;.
+        WHEN &apos;Апрель&apos;.
+          ls_stat_grup-april = &lt;lv_variable_grup&gt;.
+        WHEN &apos;Май&apos;.
+          ls_stat_grup-may = &lt;lv_variable_grup&gt;.
+        WHEN &apos;Июнь&apos;.
+          ls_stat_grup-june = &lt;lv_variable_grup&gt;.
+        WHEN &apos;Июль&apos;.
+          ls_stat_grup-july = &lt;lv_variable_grup&gt;.
+        WHEN &apos;Август&apos;.
+          ls_stat_grup-august = &lt;lv_variable_grup&gt;.
+        WHEN &apos;Сентябрь&apos;.
+          ls_stat_grup-september = &lt;lv_variable_grup&gt;.
+        WHEN &apos;Октябрь&apos;.
+          ls_stat_grup-october = &lt;lv_variable_grup&gt;.
+        WHEN &apos;Ноябрь&apos;.
+          ls_stat_grup-november = &lt;lv_variable_grup&gt;.
+        WHEN &apos;Декабрь&apos;.
+          ls_stat_grup-december = &lt;lv_variable_grup&gt;.
+      ENDCASE.
+
+      ls_stat_grup-total = ls_stat_grup-total + &lt;lv_variable_grup&gt;.
+      COLLECT ls_stat_grup INTO lt_stat_grup.
+    ENDLOOP.
+
+    ls_grups-data = lt_stat_grup.
+    APPEND ls_grups TO lt_grups.
+    lv_grup = lv_grup + 1.
+  ENDDO.
+
+
+  CALL FUNCTION &apos;ZXLWB_CALLFORM&apos;
+    EXPORTING
+      iv_formname         = &apos;Z88_EDO_STAT_BPM&apos;
+      iv_context_ref      = lt_grups
+      iv_viewer_inplace   = &apos; &apos;
+      iv_viewer_suppress  = &apos;X&apos;
+    IMPORTING
+      ev_document_rawdata = lv_excel_bin.
+
+  CALL FUNCTION &apos;XML_EXPORT_DIALOG&apos;
+    EXPORTING
+      i_xml                      = lv_excel_bin
+      i_default_extension        = &apos;XLSM&apos;
+      i_initial_directory        = &apos;&apos;
+      i_default_file_name        = &apos;export.XLSM&apos;
+      i_mask                     = &apos;Excel (*.XLSM)|*.XLSM&apos;
+    EXCEPTIONS
+      application_not_executable = 1
+      OTHERS                     = 2.
+
+ENDFORM.                    &quot;SAVE_TO_EXCEL
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  update_data
+*&amp;---------------------------------------------------------------------*
+*       Выполнение расчета
+*----------------------------------------------------------------------*
+FORM update_data.
+
+  CALL FUNCTION &apos;Z88_DO_EDO_STAT_RFC&apos;
+    EXPORTING
+      first_date = gv_first_date
+      last_date  = gv_last_date.
+
+  PERFORM generate_data_alv TABLES lt_table CHANGING lt_table.
+
+
+ENDFORM.                    &quot;update_data
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  generate_data_alv
+*&amp;---------------------------------------------------------------------*
+*       Подготовка данных для alv
+*----------------------------------------------------------------------*
+*      --&gt;LT_TABLE   Данные статистики бизнес процессов
+*      --&gt;IT_TABLE   Данные статистики бизнес процессов
+*----------------------------------------------------------------------*
+FORM generate_data_alv TABLES lt_table CHANGING it_table.
+
+  PERFORM get_rfc_table USING gv_first_date gv_last_date  CHANGING it_table .
+  CLEAR gt_output_table.
+  PERFORM create_output_table TABLES lt_table gt_output_table.
+ENDFORM.                    &quot;generate_data_alv
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  f_handle_before_user_command
+*&amp;---------------------------------------------------------------------*
+*       Вывод графика
+*----------------------------------------------------------------------*
+*      --&gt;I_UCOMM    Событие
+*----------------------------------------------------------------------*
+FORM f_handle_before_user_command  USING i_ucomm TYPE syucomm.
+  DATA: lt_need_row TYPE lvc_t_roid,
+        ls_need_row TYPE lvc_s_roid.
+
+  DATA: lt_selected_rows TYPE lvc_t_row,
+        ls_selected_rows LIKE LINE OF lt_selected_rows,
+        lv_index TYPE i.
+
+  DATA: BEGIN OF ls_data,
+          dataname(15) TYPE c,
+          quantity TYPE i,
+        END OF ls_data,
+        lt_data LIKE TABLE OF ls_data,
+
+        lt_tcol LIKE TABLE OF gv_grup_name3,
+
+        BEGIN OF ls_opt,
+          options(30) TYPE c,
+        END OF ls_opt,
+        lt_opt LIKE STANDARD TABLE OF ls_opt,
+
+        lv_name_chart TYPE string.
+
+  CALL METHOD go_grid1-&gt;get_selected_rows
+    IMPORTING
+      et_index_rows = lt_selected_rows.
+
+  LOOP AT lt_selected_rows INTO ls_selected_rows.
+  ENDLOOP.
+
+  CASE i_ucomm.
+    WHEN &apos;&amp;GRAPH&apos;.
+      IF ls_selected_rows-rowtype EQ &apos;&apos; AND ls_selected_rows-index NE &apos;00000000&apos;.
+
+        LOOP AT gt_output_table INTO gs_output_table.
+          IF sy-tabix EQ ls_selected_rows-index.
+
+            IF p_grup1 NE &apos;&apos;.
+              ls_data-dataname = gv_grup_name1.
+              ls_data-quantity = gs_output_table-grup1.
+              APPEND ls_data TO lt_data.
+            ENDIF.
+
+            IF p_grup2 NE &apos;&apos;.
+              ls_data-dataname = gv_grup_name2.
+              ls_data-quantity = gs_output_table-grup2.
+              APPEND ls_data TO lt_data.
+            ENDIF.
+
+            IF p_grup3 NE &apos;&apos;.
+              ls_data-dataname = gv_grup_name3.
+              ls_data-quantity = gs_output_table-grup3.
+              APPEND ls_data TO lt_data.
+            ENDIF.
+
+            IF p_grup4 NE &apos;&apos;.
+              ls_data-dataname = gv_grup_name4.
+              ls_data-quantity = gs_output_table-grup4.
+              APPEND ls_data TO lt_data.
+            ENDIF.
+
+            IF p_grup5 NE &apos;&apos;.
+              ls_data-dataname = gv_grup_name5.
+              ls_data-quantity = gs_output_table-grup5.
+              APPEND ls_data TO lt_data.
+            ENDIF.
+
+            ls_opt = &apos;P2ACLR = X&apos;.
+            APPEND ls_opt TO lt_opt.
+            CLEAR ls_opt.
+
+
+            APPEND gv_grup_name1 TO lt_tcol.
+            APPEND gv_grup_name2 TO lt_tcol.
+            APPEND gv_grup_name3 TO lt_tcol.
+            APPEND gv_grup_name4 TO lt_tcol.
+            APPEND gv_grup_name5 TO lt_tcol.
+
+            CONCATENATE gs_output_table-date gs_output_table-year INTO lv_name_chart SEPARATED BY space.
+
+            CALL FUNCTION &apos;GRAPH_MATRIX_2D&apos;
+              EXPORTING
+                titl = lv_name_chart
+              TABLES
+                data = lt_data
+                opts = lt_opt
+                tcol = lt_tcol.
+
+          ENDIF.
+        ENDLOOP.
+
+        CALL METHOD go_grid1-&gt;set_user_command &quot; Предотвращаем вывод стандартного графика
+          EXPORTING
+            i_ucomm = &apos;&apos;.
+
+      ENDIF.
+
+      IF ls_selected_rows-rowtype NE &apos;&apos; AND ls_selected_rows-index EQ &apos;00000000&apos;.
+
+        lv_index = &apos; &apos;.
+        ls_need_row-row_id = lv_index.
+        APPEND ls_need_row TO lt_need_row.
+
+        CALL METHOD go_grid1-&gt;set_selected_rows
+          EXPORTING
+            it_row_no = lt_need_row.
+
+      ENDIF.
+
+  ENDCASE.
+
+
+ENDFORM.                    &quot;f_handle_before_user_command</source>
+ </PROG>
+ <PROG NAME="Z88_EDO_STAT01" VARCL="X" SUBC="I" APPL="S" RMAND="601" RLOAD="R" UCCHECK="X">
+  <textPool>
+   <language SPRAS="R">
+    <textElement ID="R" ENTRY="Include Z88_EDO_STAT01" LENGTH="22 "/>
+   </language>
+  </textPool>
+  <source>*&amp;---------------------------------------------------------------------*
+*&amp;  Include           Z88_EDO_STAT01
+*&amp;---------------------------------------------------------------------*
+FORM GET_SDO_RFC_DESTINATION  changing pf_sdo_rfc type rfcdest.
+   pf_sdo_rfc = &apos;ECS_SDO&apos;.
+ENDFORM.                    &quot; GET_SDO_RFC_DESTINATION
+
+form TEST_RFC_CONNECTION  using    pf_sdo_rfc type rfcdest
+                          changing pf_connection_ok type flag.
+
+  data: lf_connection_ok type flag.
+
+  clear: lf_connection_ok.
+  do 5 times.
+    call function &apos;RFC_PING&apos; destination pf_sdo_rfc
+      exceptions
+        system_failure        = 1
+        communication_failure = 2.
+    if sy-subrc = 0.
+      pf_connection_ok = &apos;X&apos;.
+      exit.
+    endif.
+  enddo.
+
+endform.</source>
+ </PROG>
+ <TABL TABNAME="Z88S_EDO_STAT_BPM" DDLANGUAGE="R" TABCLASS="INTTAB" DATMIN="0000000000" DATMAX="0000000000" DATAVG="0000000000" DDTEXT="Структура для таблицы статистических данных бизнес процессов" AUTHCLASS="00" PROZPUFF="000" EXCLASS="0">
+  <dd09l AS4VERS="0000" SCHFELDANZ="000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_BPM" FIELDNAME="GRUP_BPM" DDLANGUAGE="R" POSITION="0001" ROLLNAME="Z88E_GRBPM" ADMINFIELD="0" INTTYPE="C" INTLEN="000004" DOMNAME="Z88D_GRBPM" ROUTPUTLEN="000000" HEADLEN="38" SCRLEN1="10" SCRLEN2="20" SCRLEN3="38" DTELMASTER="R" DATATYPE="CHAR" LENG="000002" OUTPUTLEN="000002" DECIMALS="000000" MASK="  CHARE" MASKLEN="0000" DDTEXT="Группы бизнес процессов для статистики" REPTEXT="Группы бизнес процессов для статистики" SCRTEXT_S="Группы биз" SCRTEXT_M="Группы бизнес процес" SCRTEXT_L="Группы бизнес процессов для статистики" DOMNAME3L="Z88D_GRBPM" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_BPM" FIELDNAME="PERIOD" DDLANGUAGE="R" POSITION="0002" ROLLNAME="SYDATUM" ADMINFIELD="0" INTTYPE="D" INTLEN="000016" DOMNAME="SYDATS" ROUTPUTLEN="000000" HEADLEN="08" SCRLEN1="10" SCRLEN2="20" SCRLEN3="20" DTELMASTER="D" DATATYPE="DATS" LENG="000008" OUTPUTLEN="000010" DECIMALS="000000" MASK="  DATSE" MASKLEN="0000" DDTEXT="Актуальная дата сервера приложений" REPTEXT="Дата" SCRTEXT_S="Дата" SCRTEXT_M="Текущая дата" SCRTEXT_L="Текущая дата" DOMNAME3L="SYDATS" SHLPORIGIN="T" DEPTH="00" COMPTYPE="E" DEFFDNAME="DATE" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_BPM" FIELDNAME="COUNT_PROCES" DDLANGUAGE="R" POSITION="0003" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_BPM" FIELDNAME="DATA_OP" DDLANGUAGE="R" POSITION="0004" ROLLNAME="SYDATUM" ADMINFIELD="0" INTTYPE="D" INTLEN="000016" DOMNAME="SYDATS" ROUTPUTLEN="000000" HEADLEN="08" SCRLEN1="10" SCRLEN2="20" SCRLEN3="20" DTELMASTER="D" DATATYPE="DATS" LENG="000008" OUTPUTLEN="000010" DECIMALS="000000" MASK="  DATSE" MASKLEN="0000" DDTEXT="Актуальная дата сервера приложений" REPTEXT="Дата" SCRTEXT_S="Дата" SCRTEXT_M="Текущая дата" SCRTEXT_L="Текущая дата" DOMNAME3L="SYDATS" SHLPORIGIN="T" DEPTH="00" COMPTYPE="E" DEFFDNAME="DATE" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_BPM" FIELDNAME="TIME_OP" DDLANGUAGE="R" POSITION="0005" ROLLNAME="SYUZEIT" ADMINFIELD="0" INTTYPE="T" INTLEN="000012" DOMNAME="SYTIME" ROUTPUTLEN="000000" HEADLEN="06" SCRLEN1="10" SCRLEN2="10" SCRLEN3="10" DTELMASTER="D" DATATYPE="TIMS" LENG="000006" OUTPUTLEN="000008" DECIMALS="000000" MASK="  TIMSE" MASKLEN="0000" DDTEXT="Актуальное время сервера приложений" REPTEXT="Время" SCRTEXT_S="Время" SCRTEXT_M="Время" SCRTEXT_L="Время" DOMNAME3L="SYTIME" SHLPORIGIN="T" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+ </TABL>
+ <TABL TABNAME="Z88S_EDO_STAT_GRUP_BPM" DDLANGUAGE="R" TABCLASS="INTTAB" DATMIN="0000000000" DATMAX="0000000000" DATAVG="0000000000" DDTEXT="Структура для таблицы статистики группы бизнес процесса" AUTHCLASS="00" PROZPUFF="000" EXCLASS="0">
+  <dd09l AS4VERS="0000" SCHFELDANZ="000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="YEAR" DDLANGUAGE="R" POSITION="0001" ROLLNAME="CHAR_4" ADMINFIELD="0" INTTYPE="C" INTLEN="000008" DOMNAME="CHAR4" ROUTPUTLEN="000000" HEADLEN="00" SCRLEN1="02" SCRLEN2="03" SCRLEN3="06" DTELMASTER="D" DATATYPE="CHAR" LENG="000004" OUTPUTLEN="000004" DECIMALS="000000" MASK="  CHARE" MASKLEN="0000" DDTEXT="Поле статуса" SCRTEXT_S="Ст" SCRTEXT_M="Ст." SCRTEXT_L="Статус" DOMNAME3L="CHAR4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="JANUARY" DDLANGUAGE="R" POSITION="0002" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="FEBRUARY" DDLANGUAGE="R" POSITION="0003" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="MARCH" DDLANGUAGE="R" POSITION="0004" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="APRIL" DDLANGUAGE="R" POSITION="0005" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="MAY" DDLANGUAGE="R" POSITION="0006" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="JUNE" DDLANGUAGE="R" POSITION="0007" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="JULY" DDLANGUAGE="R" POSITION="0008" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="AUGUST" DDLANGUAGE="R" POSITION="0009" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="SEPTEMBER" DDLANGUAGE="R" POSITION="0010" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="OCTOBER" DDLANGUAGE="R" POSITION="0011" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="NOVEMBER" DDLANGUAGE="R" POSITION="0012" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="DECEMBER" DDLANGUAGE="R" POSITION="0013" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUP_BPM" FIELDNAME="TOTAL" DDLANGUAGE="R" POSITION="0014" ROLLNAME="Z88E_COUNT_PROCES" ADMINFIELD="0" INTTYPE="X" INTLEN="000004" DOMNAME="INT4" ROUTPUTLEN="000000" HEADLEN="27" SCRLEN1="10" SCRLEN2="20" SCRLEN3="27" DTELMASTER="R" DATATYPE="INT4" LENG="000010" OUTPUTLEN="000010" DECIMALS="000000" SIGNFLAG="X" MASK="  INT4E" MASKLEN="0000" DDTEXT="Количество бизнес процессов" REPTEXT="Количество бизнес процессов" SCRTEXT_S="Количество" SCRTEXT_M="Количество бизнес пр" SCRTEXT_L="Количество бизнес процессов" DOMNAME3L="INT4" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+ </TABL>
+ <TABL TABNAME="Z88S_EDO_STAT_GRUPS_BPM" DDLANGUAGE="R" TABCLASS="INTTAB" DATMIN="0000000000" DATMAX="0000000000" DATAVG="0000000000" DDTEXT="Структура для таблицы статистики групп бизнес процессов" AUTHCLASS="00" PROZPUFF="000" EXCLASS="0">
+  <dd09l AS4VERS="0000" SCHFELDANZ="000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUPS_BPM" FIELDNAME="GRUP_BPM" DDLANGUAGE="R" POSITION="0001" ROLLNAME="Z88E_GRBPM" ADMINFIELD="0" INTTYPE="C" INTLEN="000004" DOMNAME="Z88D_GRBPM" ROUTPUTLEN="000000" HEADLEN="38" SCRLEN1="10" SCRLEN2="20" SCRLEN3="38" DTELMASTER="R" DATATYPE="CHAR" LENG="000002" OUTPUTLEN="000002" DECIMALS="000000" MASK="  CHARE" MASKLEN="0000" DDTEXT="Группы бизнес процессов для статистики" REPTEXT="Группы бизнес процессов для статистики" SCRTEXT_S="Группы биз" SCRTEXT_M="Группы бизнес процес" SCRTEXT_L="Группы бизнес процессов для статистики" DOMNAME3L="Z88D_GRBPM" DEPTH="00" COMPTYPE="E" EXCLASS="0" DBPOSITION="0000"/>
+  <dd03p TABNAME="Z88S_EDO_STAT_GRUPS_BPM" FIELDNAME="DATA" DDLANGUAGE="R" POSITION="0002" ROLLNAME="Z88T_EDO_STAT_GRUP_BPM" ADMINFIELD="0" INTLEN="000000" ROUTPUTLEN="000000" HEADLEN="00" SCRLEN1="00" SCRLEN2="00" SCRLEN3="00" DATATYPE="TTYP" LENG="000000" OUTPUTLEN="000000" DECIMALS="000000" MASK="  TTYPL" MASKLEN="0000" DDTEXT="Таблица статистики группы бизнес процесса" DEPTH="00" COMPTYPE="L" EXCLASS="0" DBPOSITION="0000"/>
+ </TABL>
+ <TRAN TCODE="Z88_EDO_STAT_BPM" PGMNA="Z88_EDO_STAT_BPM" DYPNO="1000" CINFO="80">
+  <tstct SPRSL="R" TCODE="Z88_EDO_STAT_BPM" TTEXT="Статистика бизнес процессов"/>
+  <tstcc TCODE="Z88_EDO_STAT_BPM" S_WEBGUI="1" S_WIN32="X" S_PLATIN="X"/>
+  <tstcp/>
+  <rsstcd ST_PROG="X" DEVCLASS="$TMP"/>
+ </TRAN>
+ <TTYP TYPENAME="Z88T_EDO_STAT_BPM" DDLANGUAGE="R" ROWTYPE="Z88S_EDO_STAT_BPM" ROWKIND="S" DATATYPE="STRU" LENG="000000" DECIMALS="000000" ACCESSMODE="T" KEYDEF="D" KEYKIND="N" KEYFDCOUNT="0000" DDTEXT="Таблица статистики бизнес процессов" TYPELEN="000052" CTLENG="000000" CTDECIMALS="000000" OCCURS="00000"/>
+ <TTYP TYPENAME="Z88T_EDO_STAT_GRUP_BPM" DDLANGUAGE="R" ROWTYPE="Z88S_EDO_STAT_GRUP_BPM" ROWKIND="S" DATATYPE="STRU" LENG="000000" DECIMALS="000000" ACCESSMODE="T" KEYDEF="D" KEYKIND="N" KEYFDCOUNT="0000" DDTEXT="Таблица статистики группы бизнес процесса" TYPELEN="000060" CTLENG="000000" CTDECIMALS="000000" OCCURS="00000"/>
+ <TTYP TYPENAME="Z88T_EDO_STAT_GRUPS_BPM" DDLANGUAGE="R" ROWTYPE="Z88S_EDO_STAT_GRUPS_BPM" ROWKIND="S" DATATYPE="STRU" LENG="000000" DECIMALS="000000" ACCESSMODE="T" KEYDEF="D" KEYKIND="N" KEYFDCOUNT="0000" DDTEXT="Таблица статистики групп бизнес процессов" TYPELEN="000016" CTLENG="000000" CTDECIMALS="000000" OCCURS="00000"/>
+</nugget>

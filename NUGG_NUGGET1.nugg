@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<nugget name="NUGGET1">
+ <PROG NAME="Z88_EDO_COUNT_TMC" VARCL="X" SUBC="1" RMAND="601" RLOAD="R" FIXPT="X" UCCHECK="X">
+  <textPool>
+   <language SPRAS="R">
+    <textElement ID="I" KEY="001" LENGTH="132 "/>
+    <textElement ID="I" KEY="002" ENTRY="BURKS" LENGTH="5 "/>
+    <textElement ID="R" ENTRY="Количесво документов неотработанных в реестре ТМЦ" LENGTH="49 "/>
+    <textElement ID="S" KEY="S_BUKRS" ENTRY="        Код БЕ" LENGTH="14 "/>
+    <textElement ID="S" KEY="S_DATE" ENTRY="        Период" LENGTH="14 "/>
+    <textElement ID="S" KEY="S_STAT" ENTRY="        Статус" LENGTH="14 "/>
+   </language>
+  </textPool>
+  <dynpros>
+   <dynpro PROG="Z88_EDO_COUNT_TMC" DNUM="0100" FNUM="0100" BZMX="27 " BZBR="120 " MILI="192 " MICO="37 " MALI="0 " MACO="0 " NOLI="27 " NOCO="120 " VALP="0 " CUAN="G" SPRA="R" DTEXT="Главный экран">
+    <dynprofield FNAM="TABLE1" DIDX="001B" FLG1="00" FLG2="00" FLG3="00" FILL="U" FMB1="30" FMB2="00" LENG="78" LINE="01" COLN="02" LANF="00" LBLK="00" LREP="00" AUTH="101" AGLT="01" ADEZ="01"/>
+    <dynprofield FNAM="OK_CODE" DIDX="0000" FLG1="80" FLG2="10" FLG3="00" FMB1="00" FMB2="00" LENG="14" LINE="FF" COLN="01" LTYP="O" LANF="00" LBLK="00" LREP="00" TYPE="CHAR" AGLT="00" ADEZ="00" STXT="____________________"/>
+    <dynproflowsource>PROCESS BEFORE OUTPUT.
+* MODULE STATUS_0100.
+MODULE PBO.
+
+PROCESS AFTER INPUT.
+* MODULE USER_COMMAND_0100.
+MODULE PAI.</dynproflowsource>
+   </dynpro>
+  </dynpros>
+  <pfstatus>
+   <pfstatus_sta CODE="MAIN100" MODAL="D" ACTCODE="000001" PFKCODE="000001" BUTCODE="0001" INT_NOTE="Количество документов неотработанных в реестре ТМЦ"/>
+   <pfstatus_fun CODE="EXIT" TEXTNO="001" TEXT_TYPE="S" FUN_TEXT="Назад"/>
+   <pfstatus_fun CODE="EXIT" TEXTNO="002" TEXT_TYPE="S" FUN_TEXT="Выход"/>
+   <pfstatus_fun CODE="EXIT" TEXTNO="003" TEXT_TYPE="S" TEXT_NAME="ICON_CANCEL" ICON_ID="@0W@" FUN_TEXT="Отменить"/>
+   <pfstatus_pfk CODE="000001" PFNO="03" FUNCODE="EXIT" FUNNO="001"/>
+   <pfstatus_pfk CODE="000001" PFNO="12" FUNCODE="EXIT" FUNNO="003"/>
+   <pfstatus_pfk CODE="000001" PFNO="15" FUNCODE="EXIT" FUNNO="002"/>
+   <pfstatus_set STATUS="MAIN100" FUNCTION="EXIT"/>
+   <pfstatus_doc OBJ_TYPE="A" OBJ_CODE="000001" MODAL="D"/>
+   <pfstatus_doc OBJ_TYPE="P" OBJ_CODE="000001" MODAL="D"/>
+   <pfstatus_doc OBJ_TYPE="B" OBJ_CODE="000001" SUB_CODE="0001" MODAL="D"/>
+   <pfstatus_tit CODE="MAIN100" TEXT="Количество документов неотработанных в реестре ТМЦ"/>
+  </pfstatus>
+  <source>*&amp;---------------------------------------------------------------------*
+*&amp; Report  Z88_EDO_COUNT_TMC
+*&amp;
+*&amp;---------------------------------------------------------------------*
+*&amp;
+*&amp;
+*&amp;---------------------------------------------------------------------*
+
+REPORT  z88_edo_count_tmc.
+
+TABLES: z00t_tmc_head,
+        t001.
+
+DATA:
+      BEGIN OF gs_grid_table,
+        bukrs LIKE z00t_tmc_head-bukrs,
+        butxt LIKE t001-butxt,
+        count TYPE i,
+      END OF gs_grid_table,
+      gt_grid_table LIKE TABLE OF gs_grid_table,
+
+      ok_code LIKE sy-ucomm,
+      go_grid1  TYPE REF TO cl_gui_alv_grid.
+
+SELECTION-SCREEN BEGIN OF BLOCK b01 WITH FRAME TITLE text-001.
+SELECT-OPTIONS s_bukrs FOR z00t_tmc_head-bukrs.
+SELECT-OPTIONS s_stat FOR z00t_tmc_head-tmc_stat.
+SELECT-OPTIONS s_date FOR z00t_tmc_head-cr_date.
+SELECTION-SCREEN END OF BLOCK b01.
+
+START-OF-SELECTION.
+
+  SELECT bukrs COUNT(*) as count INTO CORRESPONDING FIELDS OF TABLE gt_grid_table
+        FROM z00t_tmc_head
+        WHERE bukrs IN s_bukrs AND
+              tmc_stat IN s_stat AND
+              cr_date IN s_date
+        GROUP BY bukrs.
+
+
+
+  LOOP AT gt_grid_table INTO gs_grid_table.
+
+    SELECT single butxt FROM t001 INTO gs_grid_table-butxt WHERE bukrs EQ gs_grid_table-bukrs.
+
+    MODIFY gt_grid_table FROM gs_grid_table.
+
+  ENDLOOP.
+
+  CALL SCREEN 100.
+
+*----------------------------------------------------------------------*
+*  MODULE pbo OUTPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE pbo OUTPUT.
+
+  DATA:ls_layout TYPE disvariant,
+       ls_layout_lvc TYPE lvc_s_layo,
+       lt_sort TYPE lvc_t_sort,
+       ls_sort TYPE lvc_s_sort,
+       lv_repid LIKE sy-repid,
+
+       lt_fieldcat TYPE lvc_t_fcat,
+       ls_fieldcat TYPE lvc_s_fcat.
+
+  CLEAR ls_layout.
+  lv_repid = sy-repid.
+  ls_layout-report = lv_repid.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;BUKRS&apos;.
+  ls_fieldcat-reptext = &apos;Код БЕ&apos;.
+  ls_fieldcat-emphasize = &apos;X&apos;.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;BUTXT&apos;.
+  ls_fieldcat-reptext = &apos;Наименование БЕ&apos;.
+  ls_fieldcat-outputlen = 25.
+  ls_fieldcat-emphasize = &apos;X&apos;.
+
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+  CLEAR ls_fieldcat.
+  ls_fieldcat-fieldname = &apos;COUNT&apos;.
+  ls_fieldcat-reptext = &apos;Количество&apos;.
+  ls_fieldcat-outputlen = 10.
+  ls_fieldcat-do_sum  = &apos;X&apos;.
+  APPEND ls_fieldcat TO lt_fieldcat.
+
+
+
+  ls_sort-fieldname = &apos;BUKRS&apos;.
+  APPEND ls_sort TO lt_sort.
+
+  SET PF-STATUS &apos;MAIN100&apos;.
+  SET TITLEBAR &apos;MAIN100&apos;.
+  CREATE OBJECT go_grid1
+    EXPORTING
+      i_parent = cl_gui_custom_container=&gt;screen0.
+
+
+  CALL METHOD go_grid1-&gt;set_table_for_first_display
+    EXPORTING
+      i_structure_name = &apos;BURKS&apos;(002)
+      is_variant       = ls_layout
+      is_layout        = ls_layout_lvc
+    CHANGING
+      it_fieldcatalog  = lt_fieldcat
+      it_sort          = lt_sort
+      it_outtab        = gt_grid_table.
+
+ENDMODULE.                    &quot;pbo OUTPUT
+
+
+*----------------------------------------------------------------------*
+*  MODULE pai INPUT
+*----------------------------------------------------------------------*
+*
+*----------------------------------------------------------------------*
+MODULE pai INPUT.
+  CASE ok_code.
+    WHEN &apos;EXIT&apos;.
+      PERFORM exit_program.
+  ENDCASE.
+  CLEAR ok_code.
+ENDMODULE.                    &quot;pai INPUT
+
+*&amp;---------------------------------------------------------------------*
+*&amp;      Form  exit_program
+*&amp;---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM exit_program.
+*****  CALL METHOD custom_container-&gt;free.
+  LEAVE TO SCREEN 0.
+ENDFORM.                    &quot;exit_program</source>
+ </PROG>
+ <TRAN TCODE="Z88_EDO_COUNT_TMC" PGMNA="Z88_EDO_COUNT_TMC" DYPNO="1000" CINFO="80">
+  <tstct SPRSL="R" TCODE="Z88_EDO_COUNT_TMC" TTEXT="Количество неотработанных док. в ТМЦ"/>
+  <tstcc TCODE="Z88_EDO_COUNT_TMC"/>
+  <tstcp/>
+  <rsstcd ST_PROG="X" DEVCLASS="$TMP"/>
+ </TRAN>
+</nugget>
